@@ -216,7 +216,7 @@ export default async function LandingPage() {
       <section className="relative overflow-hidden">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute right-[-120px] top-[-80px] h-[420px] w-[420px] rounded-full bg-accent-100 opacity-70 blur-3xl"
+          className="pointer-events-none absolute right-[-80px] top-[-60px] h-[220px] w-[220px] rounded-full bg-accent-100 opacity-70 blur-2xl sm:right-[-120px] sm:top-[-80px] sm:h-[420px] sm:w-[420px] sm:blur-3xl"
         />
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 pb-20 pt-14 sm:pb-28 sm:pt-20 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-8">
           <Reveal className="relative max-w-[680px]">
