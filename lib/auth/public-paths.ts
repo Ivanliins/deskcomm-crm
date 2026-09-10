@@ -48,6 +48,10 @@ export const PUBLIC_PATHS: RegExp[] = [
   // antes desta linha: `GET /icon` → 307 para `/login?next=%2Ficon`, enquanto
   // `/icon.png` (inexistente) devolvia 404 — a diferença é só a extensão.
   /^\/icon$/,
+  // O cartão de compartilhamento (`app/opengraph-image.tsx`), que todo
+  // crawler de link preview pede sem cookie de sessão — mesma lacuna do
+  // `/icon` acima: caminho sem extensão, o matcher do proxy não o dispensa.
+  /^\/opengraph-image$/,
   /^\/manifest\.webmanifest$/,
   /^\/team\/accept-invite\/.+$/,
   /^\/account-suspended$/,

@@ -66,7 +66,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 
 import { ehHexValido, normalizarHex } from "./rampa";
-import type { LinhaDaInstalacao } from "./resolve";
+import {
+  camadaDaInstalacao,
+  camadaDoAmbiente,
+  resolverMarca,
+  type LinhaDaInstalacao,
+  type MarcaResolvida,
+} from "./resolve";
+import { REGUA_DO_PRODUTO } from "./regua-do-produto";
 
 /** A linha inteira de `platform_branding`. O resolvedor só conhece três campos. */
 export type LinhaDaMarca = LinhaDaInstalacao & {
@@ -355,6 +362,28 @@ export async function marcaDaInstalacao(): Promise<LinhaDaMarca | null> {
     guardarMemo({ linha, expiraEm: Date.now() + TTL_MS });
   }
   return linha;
+}
+
+/**
+ * A marca da instalação já resolvida — banco acima do `.env`, mesma pilha que
+ * `app/layout.tsx` monta. Extraída pra cá porque a landing pública
+ * (`app/page.tsx`) passou a precisar da MESMA resolução: duplicar a
+ * composição nos dois arquivos divergiria exatamente do jeito que o
+ * comentário de `layout.tsx` já alertava — título de aba com uma marca, corpo
+ * da página com outra. `marcaDaInstalacao()` já é memoizada por processo
+ * (TTL acima), então chamar isto de dois pontos na mesma requisição custa UMA
+ * consulta, não duas.
+ */
+export async function marcaDaInstalacaoResolvida(): Promise<{
+  readonly linha: LinhaDaMarca | null;
+  readonly marca: MarcaResolvida;
+}> {
+  const linha = await marcaDaInstalacao();
+  const marca = resolverMarca(
+    [camadaDaInstalacao(linha), camadaDoAmbiente(env)],
+    REGUA_DO_PRODUTO,
+  );
+  return { linha, marca };
 }
 
 async function lerOuSemear(): Promise<LinhaDaMarca | null> {

@@ -39,7 +39,10 @@ export function LandingNav({ name }: { name: string }) {
     <>
       <header className="sticky top-0 z-40 flex justify-center px-4 pt-4 sm:pt-6">
         <div className="flex w-full max-w-3xl items-center justify-between gap-3 rounded-full border border-border bg-bg/80 py-2 pl-4 pr-2 shadow-sm backdrop-blur-xl sm:gap-6 sm:pl-5">
-          <Link href="/" className="max-w-[34vw] truncate text-sm font-bold tracking-tight sm:max-w-none">
+          <Link
+            href="/"
+            className="max-w-[34vw] truncate rounded-sm text-sm font-bold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:max-w-none"
+          >
             {name}
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-muted-foreground sm:flex">
@@ -47,7 +50,7 @@ export function LandingNav({ name }: { name: string }) {
               <a
                 key={link.href}
                 href={link.href}
-                className="transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-text"
+                className="rounded-sm transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
               >
                 {link.label}
               </a>
@@ -69,7 +72,7 @@ export function LandingNav({ name }: { name: string }) {
               aria-controls="menu-mobile"
               aria-label={open ? "Fechar menu" : "Abrir menu"}
               onClick={() => setOpen((v) => !v)}
-              className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-300 hover:bg-surface-elevated sm:hidden"
+              className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-300 hover:bg-surface-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:hidden"
             >
               <span className="relative block h-3.5 w-4">
                 <span
@@ -104,7 +107,7 @@ export function LandingNav({ name }: { name: string }) {
             key={link.href}
             href={link.href}
             onClick={() => setOpen(false)}
-            className={`text-2xl font-semibold transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+            className={`rounded-sm text-2xl font-semibold transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg ${
               open ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
             }`}
             style={{ transitionDelay: open ? `${100 + i * 60}ms` : "0ms" }}
@@ -115,7 +118,7 @@ export function LandingNav({ name }: { name: string }) {
         <Link
           href="/login"
           onClick={() => setOpen(false)}
-          className={`text-2xl font-semibold transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+          className={`rounded-sm text-2xl font-semibold transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg ${
             open ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
           }`}
           style={{ transitionDelay: open ? `${100 + LINKS.length * 60}ms` : "0ms" }}

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CaretDown, Check, Robot, ShieldCheck, Table } from "@phosphor-icons/react/ssr";
 
-import { branding } from "@/lib/branding";
+import { marcaDaInstalacaoResolvida } from "@/lib/branding/instalacao";
 import { loadAuthUser } from "@/lib/auth/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Button } from "@/components/ui/button";
@@ -32,13 +32,30 @@ const inter = Inter({
  * exatamente o oposto, o único lugar do domínio que QUER ser encontrado.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const { name } = branding();
+  const { marca } = await marcaDaInstalacaoResolvida();
+  const { name } = marca;
+  const title = `${name} — CRM com IA nativa no WhatsApp`;
+  const description = `${name} atende, qualifica e move o funil pelo WhatsApp com agentes de IA — tudo registrado e auditável. Planos sem cobrança por assento.`;
   return {
     // `title.absolute` ignora o `template` do layout raiz ("%s · {name}") — a
     // home NÃO deve virar "{name} — CRM... · {name}", que duplicaria a marca.
-    title: { absolute: `${name} — CRM com IA nativa no WhatsApp` },
-    description: `${name} atende, qualifica e move o funil pelo WhatsApp com agentes de IA — tudo registrado e auditável. Planos sem cobrança por assento.`,
+    title: { absolute: title },
+    description,
     robots: { index: true, follow: true },
+    alternates: { canonical: "/" },
+    // Sem `images`: o Next resolve sozinho pra `app/opengraph-image.tsx`
+    // (convenção de arquivo), que já desenha a marca da instalação em runtime.
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale: "pt_BR",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 
@@ -62,8 +79,9 @@ function precoFormatado(cents: number, currency: string): string {
   }).format(cents / 100);
 }
 
-function limiteFormatado(n: number | null, unidade: string): string {
-  return n === null ? `${unidade} ilimitados` : `${n.toLocaleString("pt-BR")} ${unidade}`;
+function limiteFormatado(n: number | null, singular: string, plural: string): string {
+  if (n === null) return `${plural} ilimitados`;
+  return `${n.toLocaleString("pt-BR")} ${n === 1 ? singular : plural}`;
 }
 
 /**
@@ -196,7 +214,8 @@ export default async function LandingPage() {
   const user = await loadAuthUser();
   if (user) redirect("/app");
 
-  const { name } = branding();
+  const { marca } = await marcaDaInstalacaoResolvida();
+  const { name } = marca;
   const { data: planosData } = await createAdminClient()
     .from("plans")
     .select("slug, name, description, price_cents, currency, billing_interval, max_seats, max_whatsapp_numbers, max_messages_month")
@@ -268,7 +287,7 @@ export default async function LandingPage() {
           </Reveal>
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
             <Reveal delay={80}>
-              <div className="flex h-full flex-col gap-3 rounded-xl border border-border bg-bg p-6">
+              <div className="flex h-full flex-col gap-3 rounded-xl border border-border bg-bg p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent">
                 <Table size={22} weight="duotone" className="text-accent" aria-hidden="true" />
                 <h3 className="font-semibold">O CRM que é planilha bonita</h3>
                 <p className="text-sm leading-relaxed text-pretty text-muted-foreground">
@@ -278,7 +297,7 @@ export default async function LandingPage() {
               </div>
             </Reveal>
             <Reveal delay={160}>
-              <div className="flex h-full flex-col gap-3 rounded-xl border border-border bg-bg p-6">
+              <div className="flex h-full flex-col gap-3 rounded-xl border border-border bg-bg p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent">
                 <Robot size={22} weight="duotone" className="text-accent" aria-hidden="true" />
                 <h3 className="font-semibold">O robô que responde e some</h3>
                 <p className="text-sm leading-relaxed text-pretty text-muted-foreground">
@@ -351,9 +370,9 @@ export default async function LandingPage() {
                     </p>
                     <ul className="mt-4 flex-1 space-y-2 text-sm text-muted-foreground">
                       {[
-                        limiteFormatado(plano.max_seats, "usuários"),
-                        limiteFormatado(plano.max_whatsapp_numbers, "números de WhatsApp"),
-                        limiteFormatado(plano.max_messages_month, "mensagens/mês"),
+                        limiteFormatado(plano.max_seats, "usuário", "usuários"),
+                        limiteFormatado(plano.max_whatsapp_numbers, "número de WhatsApp", "números de WhatsApp"),
+                        limiteFormatado(plano.max_messages_month, "mensagem/mês", "mensagens/mês"),
                       ].map((linha) => (
                         <li key={linha} className="flex items-start gap-2">
                           <Check size={16} weight="bold" className="mt-0.5 shrink-0 text-accent" aria-hidden="true" />
@@ -388,6 +407,23 @@ export default async function LandingPage() {
       {/* FAQ — <details>/<summary> nativos: funcionam sem JavaScript nenhum e
           o conteúdo fechado continua indexável por buscadores. */}
       <section id="faq" className="border-t border-border bg-surface-elevated/40 py-20">
+        {/* FAQPage schema (AEO): dados estáticos do próprio array FAQ, nunca
+            entrada de usuário — JSON.stringify já escapa o necessário pra sair
+            de dentro de um <script>. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: FAQ.map((item) => ({
+                "@type": "Question",
+                name: item.pergunta,
+                acceptedAnswer: { "@type": "Answer", text: item.resposta },
+              })),
+            }),
+          }}
+        />
         <div className="mx-auto max-w-3xl px-6">
           <Reveal>
             <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Perguntas frequentes</h2>
@@ -396,7 +432,7 @@ export default async function LandingPage() {
             {FAQ.map((item, i) => (
               <Reveal key={item.pergunta} delay={Math.min(i * 60, 240)}>
                 <details className="group py-6">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold marker:content-none">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-sm font-semibold marker:content-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg">
                     {item.pergunta}
                     <CaretDown
                       size={16}
@@ -430,10 +466,16 @@ export default async function LandingPage() {
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-6 text-center text-xs text-muted-foreground sm:flex-row sm:justify-between sm:text-left">
           <span>{name} · Feito no Brasil</span>
           <nav className="flex items-center gap-4">
-            <Link href="/legal/privacy" className="transition-colors duration-300 hover:text-text">
+            <Link
+              href="/legal/privacy"
+              className="rounded-sm transition-colors duration-300 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+            >
               Privacidade
             </Link>
-            <Link href="/legal/terms" className="transition-colors duration-300 hover:text-text">
+            <Link
+              href="/legal/terms"
+              className="rounded-sm transition-colors duration-300 hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+            >
               Termos de uso
             </Link>
           </nav>

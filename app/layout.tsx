@@ -6,18 +6,11 @@ import { coresDaBarraDoNavegador } from "@/lib/branding/barra-do-navegador";
 import { MarcaDaInstalacaoProvider } from "@/lib/branding/contexto";
 import { cssDaMarca } from "@/lib/branding/css";
 import {
-  marcaDaInstalacao,
+  marcaDaInstalacaoResolvida as marcaResolvida,
   motivoDoFallback,
   registrarEstadoDaMarca,
-  type LinhaDaMarca,
 } from "@/lib/branding/instalacao";
 import { REGUA_DO_PRODUTO } from "@/lib/branding/regua-do-produto";
-import {
-  camadaDaInstalacao,
-  camadaDoAmbiente,
-  resolverMarca,
-  type MarcaResolvida,
-} from "@/lib/branding/resolve";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { ThemeProvider } from "@/lib/theme";
@@ -42,26 +35,17 @@ const plexMono = IBM_Plex_Mono({
 /**
  * A pilha de camadas da marca da instalação: BANCO acima, `.env` embaixo.
  *
- * Uma função só porque `generateMetadata`, `EstiloDaMarca` e `MarcaNoNavegador`
- * precisam da MESMA resolução — montagens separadas da pilha divergiriam, e a
- * divergência apareceria como título da aba com uma marca, cor com outra e barra
- * lateral com uma terceira.
+ * `generateMetadata`, `EstiloDaMarca` e `MarcaNoNavegador` precisam da MESMA
+ * resolução — montagens separadas da pilha divergiriam, e a divergência
+ * apareceria como título da aba com uma marca, cor com outra e barra lateral
+ * com uma terceira. A composição em si (e por que a landing pública em
+ * `app/page.tsx` agora chama a MESMA função) vive em
+ * `lib/branding/instalacao.ts`, junto do único módulo que fala com
+ * `platform_branding`.
  *
- * A leitura do banco é memoizada em `lib/branding/instalacao.ts`, então as três
+ * A leitura do banco é memoizada em `lib/branding/instalacao.ts`, então as
  * chamadas por requisição custam UMA consulta a cada TTL.
  */
-async function marcaResolvida(): Promise<{
-  /** A linha crua — só `EstiloDaMarca` precisa dela, para gravar o estado. */
-  readonly linha: LinhaDaMarca | null;
-  readonly marca: MarcaResolvida;
-}> {
-  const linha = await marcaDaInstalacao();
-  const marca = resolverMarca(
-    [camadaDaInstalacao(linha), camadaDoAmbiente(env)],
-    REGUA_DO_PRODUTO,
-  );
-  return { linha, marca };
-}
 
 /**
  * Metadata dinâmica (não `export const metadata`) para a marca ser lida em RUNTIME.
@@ -81,6 +65,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const { marca } = await marcaResolvida();
   const { name } = marca;
   return {
+    // Base pra resolver toda URL relativa em metadata (og:image inclusive)
+    // como absoluta — sem isto o Next cai em `http://localhost:3000` nas
+    // tags sociais, e todo link preview em produção quebra silenciosamente.
+    metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
     title: {
       default: `${name} — atendimento e vendas por WhatsApp com agentes de IA`,
       template: `%s · ${name}`,
