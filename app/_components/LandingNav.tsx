@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import styles from "../page.module.css";
 
 const LINKS = [
   { href: "#jornada", label: "Como funciona" },
@@ -38,7 +39,9 @@ export function LandingNav({ name }: { name: string }) {
   return (
     <>
       <header className="sticky top-0 z-40 flex justify-center px-4 pt-4 sm:pt-6">
-        <div className="flex w-full max-w-3xl items-center justify-between gap-3 rounded-full border border-border bg-bg/80 py-2 pl-4 pr-2 shadow-sm backdrop-blur-xl sm:gap-6 sm:pl-5">
+        <div
+          className={`flex w-full max-w-3xl items-center justify-between gap-3 rounded-full border border-border bg-accent-100/70 py-2 pl-4 pr-2 backdrop-blur-xl sm:gap-6 sm:pl-5 ${styles.floatShadow}`}
+        >
           <Link
             href="/"
             className="max-w-[34vw] truncate rounded-sm text-sm font-bold tracking-tight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:max-w-none"

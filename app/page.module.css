@@ -155,3 +155,24 @@
     transition: none;
   }
 }
+
+/* Sombra em duas camadas (curta e difusa) em vez de uma só — é o que faz a
+   pílula da nav e os cards lerem como um objeto flutuando sobre a página, não
+   um retângulo com contorno. Neutra de propósito: sombra não carrega cor de
+   marca, só profundidade. */
+.floatShadow {
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.06),
+    0 12px 40px rgba(0, 0, 0, 0.05);
+}
+
+/* Selo de vidro: vidro de verdade (o fundo É translúcido, o blur tem o que
+   desfocar por trás), não um selo opaco que só usa a palavra "glass". Único
+   lugar da landing onde o accent aparece como VIDRO em vez de preenchimento
+   sólido — os botões continuam com `bg-accent` cheio. */
+.glassBadge {
+  background: rgba(154, 255, 134, 0.16);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(154, 255, 134, 0.4);
+}

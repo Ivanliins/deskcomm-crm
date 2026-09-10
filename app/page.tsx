@@ -250,7 +250,17 @@ export default async function LandingPage() {
               Agentes de IA atendem no WhatsApp, qualificam o lead e movem o funil — com tudo
               registrado e auditável. Sem cobrança por usuário: seu time cresce, o plano não muda.
             </p>
-            <div className="mt-9 flex flex-wrap items-center gap-3">
+            <ul className="mt-6 flex flex-wrap gap-2">
+              {["Multi-tenant com RLS", "LGPD nativa desde o dia 1", "Sem cobrança por assento"].map((selo) => (
+                <li
+                  key={selo}
+                  className={`rounded-full px-3 py-1 text-xs font-medium text-text ${styles.glassBadge}`}
+                >
+                  {selo}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
               <Button asChild size="lg">
                 <Link href="#precos">Começar teste grátis de 14 dias</Link>
               </Button>
@@ -287,7 +297,7 @@ export default async function LandingPage() {
           </Reveal>
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
             <Reveal delay={80}>
-              <div className="flex h-full flex-col gap-3 rounded-xl border border-border bg-bg p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent">
+              <div className={`flex h-full flex-col gap-3 rounded-xl border border-border bg-bg p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent ${styles.floatShadow}`}>
                 <Table size={22} weight="duotone" className="text-accent" aria-hidden="true" />
                 <h3 className="font-semibold">O CRM que é planilha bonita</h3>
                 <p className="text-sm leading-relaxed text-pretty text-muted-foreground">
@@ -297,7 +307,7 @@ export default async function LandingPage() {
               </div>
             </Reveal>
             <Reveal delay={160}>
-              <div className="flex h-full flex-col gap-3 rounded-xl border border-border bg-bg p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent">
+              <div className={`flex h-full flex-col gap-3 rounded-xl border border-border bg-bg p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent ${styles.floatShadow}`}>
                 <Robot size={22} weight="duotone" className="text-accent" aria-hidden="true" />
                 <h3 className="font-semibold">O robô que responde e some</h3>
                 <p className="text-sm leading-relaxed text-pretty text-muted-foreground">
@@ -349,8 +359,8 @@ export default async function LandingPage() {
               return (
                 <Reveal key={plano.slug} delay={i * 80} className="h-full">
                   <div
-                    className={`relative flex h-full flex-col rounded-xl border bg-bg p-6 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-1 ${
-                      destaque ? "border-accent shadow-md" : "border-border"
+                    className={`relative flex h-full flex-col rounded-xl border bg-bg p-6 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-1 ${styles.floatShadow} ${
+                      destaque ? "border-accent" : "border-border"
                     }`}
                   >
                     {destaque && (
