@@ -1,0 +1,157 @@
+/*
+ * Motion da landing page — escopado aqui, fora de globals.css, porque é
+ * específico desta página e não do design system da aplicação autenticada
+ * (docs/design-system/07-motion-language.md proíbe parallax decorativo ali;
+ * aqui a regra equivalente é mais simples ainda: a única camada que se move é
+ * o ponto do lead percorrendo a trilha, porque É ISSO que o produto faz —
+ * "camada que se move precisa estar explicando o produto", nunca decoração).
+ *
+ * Um ÚNICO `offset-path` contínuo, de propósito: `offset-path` não é uma
+ * propriedade interpolável entre valores de `path()` diferentes — trocar de
+ * trilha no meio da animação (duas trilhas com pontos de emenda que não
+ * coincidem em pixel) produz um salto instantâneo do ponto, não um movimento
+ * suave. Uma curva só, do nó "Conversa" até o nó "Funil", evita o problema
+ * por construção em vez de tentar casar coordenadas.
+ *
+ * `prefers-reduced-motion`: o ponto para no fim da trilha, trilha e nós
+ * continuam 100% visíveis e legíveis — a ilustração conta a história inteira
+ * parada.
+ */
+
+.lead {
+  offset-path: path("M 115 235 C 160 215 190 195 246 158 C 300 130 340 120 372 112");
+  offset-distance: 0%;
+  animation: travel 2.4s 0.4s cubic-bezier(0.4, 0, 0.2, 1) 1 forwards;
+}
+
+@keyframes travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lead {
+    animation: none;
+    offset-distance: 100%;
+  }
+}
+
+/*
+ * Paleta e tipografia da landing são escopadas AQUI, na classe `.landing`, e
+ * não em `:root` de `globals.css` — pela mesma razão pela qual a animação
+ * acima já vive neste arquivo: a landing tem identidade visual própria,
+ * separada do design system Sage do app autenticado (docs/design-system/).
+ * Sobrescrever `:root` mudaria a cor de toda a aplicação logada; sobrescrever
+ * numa classe ancestral só afeta quem está dentro dela — os utilitários
+ * `bg-bg`, `text-muted-foreground`, `bg-accent` etc. continuam os mesmos em
+ * ambos os lugares, só o VALOR de cada variável muda dentro de `.landing`.
+ */
+.landing {
+  color-scheme: light;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Sobrescreve o bridge global (Atkinson) só aqui dentro — sem isto, um
+     elemento que herda `font-family` do `.landing` fica em Inter, mas quem usa
+     a UTILITY `font-sans` explicitamente (ex.: o "/mês" ao lado do preço em
+     mono) resolveria `var(--font-sans)` direto na raiz e voltaria pra Atkinson. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f2f5f3;
+  --color-overlay: rgba(0, 0, 0, 0.5);
+
+  --color-text: #000000;
+  --color-text-muted: rgba(0, 0, 0, 0.62);
+  --color-text-subtle: rgba(0, 0, 0, 0.44);
+
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-border-strong: rgba(0, 0, 0, 0.18);
+
+  --color-accent: #9aff86;
+  --color-accent-fg: #000000;
+  --color-accent-hover: #7fe968;
+  --color-accent-100: #e4ffdc;
+  /* Sólida, não rgba — igual ao padrão do tema Sage original (`--color-accent-soft:
+     var(--color-accent-100)`). Um valor já semitransparente aqui quebraria os
+     `bg-accent-soft/NN` usados na página: o modificador de opacidade do Tailwind
+     multiplicaria alfa sobre alfa e o resultado ficaria quase invisível. */
+  --color-accent-soft: var(--color-accent-100);
+  --color-accent-500: #4ccb33;
+}
+
+/* Título do hero (B5): único lugar da landing em que gradiente é permitido,
+   e só no TEXTO, nunca em fundo. Claro: preto → cinza, da esquerda pra direita. */
+.heroTitle {
+  background: linear-gradient(90deg, #000000, #666666);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/*
+ * Fade up com blur ao entrar na tela (B7). `.reveal` só nasce invisível
+ * quando `html` carrega a classe `js-reveal` — um script inline síncrono no
+ * topo da página adiciona essa classe antes de qualquer conteúdo abaixo ser
+ * pintado. Sem isso, JavaScript desligado (ou que falhe antes de hidratar)
+ * deixaria a página inteira em branco pra sempre: rastreador de busca e
+ * usuário sem JS precisam ver o conteúdo, sempre, com ou sem animação.
+ */
+:global(.js-reveal) .reveal {
+  opacity: 0;
+  transform: translateY(4rem);
+  filter: blur(6px);
+}
+
+.reveal {
+  transition:
+    opacity 900ms cubic-bezier(0.32, 0.72, 0, 1),
+    transform 900ms cubic-bezier(0.32, 0.72, 0, 1),
+    filter 900ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.reveal.revealVisible {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+}
+
+/* Seção de tagline (B11): cada palavra nasce apagada e ganha cor plena ao
+   cruzar a linha de gatilho — ver TaglineReveal.tsx para o observer. Mesmo
+   motivo do `.reveal` acima: a cor apagada só existe quando `html.js-reveal`
+   está presente, senão texto sem JS ficaria permanentemente em baixo contraste. */
+.word {
+  transition: color 700ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+:global(.js-reveal) .word {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.word.wordActive {
+  color: #000000;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(.js-reveal) .reveal {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+    transition: none;
+  }
+
+  :global(.js-reveal) .word {
+    color: #000000;
+  }
+
+  .word {
+    transition: none;
+  }
+}
