@@ -70,7 +70,7 @@ export function LandingNav({ name }: { name: string }) {
               <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
                 <Link href="/login">Entrar</Link>
               </Button>
-              <Button asChild size="sm">
+              <Button asChild size="sm" className={styles.glintCta}>
                 <Link href="#precos">
                   <span className="hidden sm:inline">Começar teste grátis</span>
                   <span className="sm:hidden">Testar grátis</span>

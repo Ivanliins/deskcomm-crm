@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Instrument_Serif } from "next/font/google";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CaretDown, Check, Robot, ShieldCheck, Table } from "@phosphor-icons/react/ssr";
@@ -18,6 +18,17 @@ const inter = Inter({
   weight: ["400", "500", "700"],
   display: "swap",
   variable: "--font-inter",
+});
+
+/** Só o H1 do hero usa isto (ver `.heroTitle` em page.module.css) — o resto
+ * do site segue 100% Inter. Par deliberado, a pedido explícito: contraste
+ * serifado só no momento de maior impacto da página, não uma segunda fonte
+ * espalhada pelo site inteiro. */
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  variable: "--font-serif-display",
 });
 
 /**
@@ -224,7 +235,7 @@ export default async function LandingPage() {
   const planos = (planosData ?? []) as PlanoPublico[];
 
   return (
-    <div className={`${styles.landing} ${inter.variable} min-h-screen bg-bg text-text`}>
+    <div className={`${styles.landing} ${inter.variable} ${instrumentSerif.variable} min-h-screen bg-bg text-text`}>
       {/* Sem isto, JS desligado ou que falhe antes de hidratar deixa todo
           conteúdo abaixo do topo em `opacity:0` para sempre — ver page.module.css. */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-reveal')" }} />
@@ -269,7 +280,7 @@ export default async function LandingPage() {
               ))}
             </ul>
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Button asChild size="lg">
+              <Button asChild size="lg" className={styles.glintCta}>
                 <Link href="#precos">Começar teste grátis de 14 dias</Link>
               </Button>
               <Button asChild variant="outline" size="lg">
@@ -473,7 +484,7 @@ export default async function LandingPage() {
           <Reveal>
             <h2 className="text-2xl font-bold tracking-tight text-balance sm:text-3xl">Comece a atender pelo WhatsApp hoje</h2>
             <p className="mt-3 text-muted-foreground">14 dias grátis, sem cartão de crédito.</p>
-            <Button asChild size="lg" className="mt-7">
+            <Button asChild size="lg" className={`mt-7 ${styles.glintCta}`}>
               <Link href="#precos">Começar agora</Link>
             </Button>
           </Reveal>
