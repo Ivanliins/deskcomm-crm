@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Instrument_Serif } from "next/font/google";
+import { Inter } from "next/font/google";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CaretDown, Check, Robot, ShieldCheck, Table } from "@phosphor-icons/react/ssr";
@@ -13,22 +13,14 @@ import { Reveal } from "./_components/Reveal";
 import { TaglineReveal } from "./_components/TaglineReveal";
 import styles from "./page.module.css";
 
+/** A mesma família do logo (o wordmark "UpFlow" é Inter Bold) — inclusive no
+ * H1 do hero, que antes usava uma serifada só ali. Pedido explícito: um site
+ * só, uma fonte só, a mesma da marca. */
 const inter = Inter({
   subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "700"],
+  weight: ["400", "500", "700", "800", "900"],
   display: "swap",
   variable: "--font-inter",
-});
-
-/** Só o H1 do hero usa isto (ver `.heroTitle` em page.module.css) — o resto
- * do site segue 100% Inter. Par deliberado, a pedido explícito: contraste
- * serifado só no momento de maior impacto da página, não uma segunda fonte
- * espalhada pelo site inteiro. */
-const instrumentSerif = Instrument_Serif({
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-  variable: "--font-serif-display",
 });
 
 /**
@@ -151,19 +143,19 @@ function IlustracaoDaMesa() {
     <svg viewBox="0 0 480 320" className="h-auto w-full max-w-[520px]" aria-hidden="true">
       <rect x="16" y="16" width="448" height="288" rx="24" className="fill-surface stroke-border" />
 
-      <path d="M 115 235 C 160 215 190 195 216 175" fill="none" className="stroke-border-strong" strokeWidth={2} />
-      <path d="M 280 146 C 310 132 340 120 372 112" fill="none" className="stroke-border-strong" strokeWidth={2} />
+      <path d="M 115 235 C 160 215 190 195 216 175" fill="none" className="stroke-accent/60" strokeWidth={2} />
+      <path d="M 280 146 C 310 132 340 120 372 112" fill="none" className="stroke-accent/60" strokeWidth={2} />
       <path
         d="M 274 177 Q 320 200 354 233"
         fill="none"
-        className="stroke-border-strong"
+        className="stroke-accent/60"
         strokeWidth={2}
         strokeDasharray="3 5"
       />
 
       {/* Conversa */}
       <g>
-        <rect x="74" y="224" width="44" height="44" rx="12" className="fill-surface-elevated stroke-border" />
+        <rect x="74" y="224" width="44" height="44" rx="12" className="fill-accent-100 stroke-accent/50" />
         <path
           d="M 86 240 h20 a4 4 0 0 1 4 4 v6 a4 4 0 0 1 -4 4 h-10 l-6 5 v-5 h-4 a4 4 0 0 1 -4 -4 v-6 a4 4 0 0 1 4 -4 z"
           fill="none"
@@ -197,7 +189,7 @@ function IlustracaoDaMesa() {
 
       {/* Funil */}
       <g>
-        <rect x="350" y="90" width="44" height="44" rx="12" className="fill-surface-elevated stroke-border" />
+        <rect x="350" y="90" width="44" height="44" rx="12" className="fill-accent-100 stroke-accent/50" />
         <rect x="360" y="100" width="6" height="24" rx="2" className="fill-text-muted" />
         <rect x="369" y="106" width="6" height="18" rx="2" className="fill-text-muted" opacity={0.55} />
         <rect x="378" y="112" width="6" height="12" rx="2" className="fill-text-muted" opacity={0.3} />
@@ -208,7 +200,7 @@ function IlustracaoDaMesa() {
 
       {/* Follow-up */}
       <g>
-        <rect x="332" y="211" width="44" height="44" rx="12" className="fill-surface-elevated stroke-border" />
+        <rect x="332" y="211" width="44" height="44" rx="12" className="fill-accent-100 stroke-accent/50" />
         <circle cx="354" cy="233" r="11" fill="none" className="stroke-text-muted" strokeWidth={1.6} />
         <path d="M 354 226 v7 l5 4" fill="none" className="stroke-text-muted" strokeWidth={1.6} strokeLinecap="round" />
         <text x="354" y="273" textAnchor="middle" className="fill-text-muted font-mono text-[9.5px] font-medium uppercase tracking-wider">
@@ -226,7 +218,7 @@ export default async function LandingPage() {
   if (user) redirect("/app");
 
   const { marca } = await marcaDaInstalacaoResolvida();
-  const { name } = marca;
+  const { name, logoUrl } = marca;
   const { data: planosData } = await createAdminClient()
     .from("plans")
     .select("slug, name, description, price_cents, currency, billing_interval, max_seats, max_whatsapp_numbers, max_messages_month")
@@ -235,12 +227,12 @@ export default async function LandingPage() {
   const planos = (planosData ?? []) as PlanoPublico[];
 
   return (
-    <div className={`${styles.landing} ${inter.variable} ${instrumentSerif.variable} min-h-screen bg-bg text-text`}>
+    <div className={`${styles.landing} ${inter.variable} min-h-screen bg-bg text-text`}>
       {/* Sem isto, JS desligado ou que falhe antes de hidratar deixa todo
           conteúdo abaixo do topo em `opacity:0` para sempre — ver page.module.css. */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-reveal')" }} />
 
-      <LandingNav name={name} />
+      <LandingNav name={name} logoUrl={logoUrl} />
 
       {/* Hero — cena de abertura em altura quase cheia, conteúdo ancorado
           embaixo (padrão pedido: nav flutuante no topo, texto colado na base
@@ -248,7 +240,11 @@ export default async function LandingPage() {
       <section className="relative overflow-hidden">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute right-[-80px] top-[-60px] h-[220px] w-[220px] rounded-full bg-accent-100 opacity-70 blur-2xl sm:right-[-120px] sm:top-[-80px] sm:h-[420px] sm:w-[420px] sm:blur-3xl"
+          className="pointer-events-none absolute right-[-80px] top-[-60px] h-[260px] w-[260px] rounded-full bg-accent/25 blur-2xl sm:right-[-140px] sm:top-[-100px] sm:h-[520px] sm:w-[520px] sm:blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-[-120px] bottom-[-80px] hidden h-[360px] w-[360px] rounded-full bg-accent/10 blur-3xl lg:block"
         />
         <div className="mx-auto flex min-h-[75svh] max-w-6xl flex-col justify-end gap-12 px-6 pb-16 pt-14 sm:pb-20 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
           <Reveal className="relative max-w-[680px] lg:flex-1">
@@ -316,7 +312,7 @@ export default async function LandingPage() {
           </Reveal>
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
             <Reveal delay={80}>
-              <div className={`flex h-full flex-col gap-3 rounded-xl border border-border bg-bg p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent ${styles.floatShadow}`}>
+              <div className={`flex h-full flex-col gap-3 rounded-xl border border-border bg-surface p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent ${styles.floatShadow}`}>
                 <Table size={22} weight="duotone" className="text-accent" aria-hidden="true" />
                 <h3 className="font-semibold">O CRM que é planilha bonita</h3>
                 <p className="text-sm leading-relaxed text-pretty text-muted-foreground">
@@ -326,7 +322,7 @@ export default async function LandingPage() {
               </div>
             </Reveal>
             <Reveal delay={160}>
-              <div className={`flex h-full flex-col gap-3 rounded-xl border border-border bg-bg p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent ${styles.floatShadow}`}>
+              <div className={`flex h-full flex-col gap-3 rounded-xl border border-border bg-surface p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent ${styles.floatShadow}`}>
                 <Robot size={22} weight="duotone" className="text-accent" aria-hidden="true" />
                 <h3 className="font-semibold">O robô que responde e some</h3>
                 <p className="text-sm leading-relaxed text-pretty text-muted-foreground">
@@ -378,7 +374,7 @@ export default async function LandingPage() {
               return (
                 <Reveal key={plano.slug} delay={i * 80} className="h-full">
                   <div
-                    className={`relative flex h-full flex-col rounded-xl border bg-bg p-6 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-1 ${styles.floatShadow} ${
+                    className={`relative flex h-full flex-col rounded-xl border bg-surface p-6 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-1 ${styles.floatShadow} ${
                       destaque ? "border-accent" : "border-border"
                     }`}
                   >

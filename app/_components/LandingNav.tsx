@@ -19,7 +19,7 @@ const LINKS = [
  * do hambúrguer abrir — porque sem JavaScript o botão continua funcionando
  * (é um <Link>), enquanto o menu cheio de tela depende de estado React.
  */
-export function LandingNav({ name }: { name: string }) {
+export function LandingNav({ name, logoUrl }: { name: string; logoUrl: string | null }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -40,21 +40,30 @@ export function LandingNav({ name }: { name: string }) {
     <>
       <header className="sticky top-0 z-40 flex justify-center px-4 pt-4 sm:pt-6">
         <div className="flex w-full max-w-3xl items-center gap-2 sm:gap-3">
-          {/* Pílula circular com a inicial do nome — a mesma ideia do ícone
-              da aba (`app/icon.tsx`): cor de destaque + inicial, nunca uma
-              imagem fixa, porque o produto é white-label e qualquer nome
-              futuro precisa continuar cabendo aqui sem redesenho. */}
-          <Link
-            href="/"
-            aria-label={name}
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:h-11 sm:w-11 ${styles.floatShadow}`}
-          >
-            {name.charAt(0).toUpperCase()}
-          </Link>
           <div
             className={`flex min-w-0 flex-1 items-center justify-between gap-3 rounded-full border border-border bg-accent-100/70 py-2 pl-4 pr-2 backdrop-blur-xl sm:gap-6 sm:pl-5 ${styles.floatShadow}`}
           >
-            <span className="hidden max-w-[16vw] truncate text-sm font-bold tracking-tight sm:inline">{name}</span>
+            {/* Marca: logo enviado pela tela de Marca quando existe (mesma
+                precedência de `Sidebar.tsx` — arquivo subido vence tudo),
+                senão cai no nome em texto. Nunca uma imagem fixa neste
+                componente: o produto é white-label e qualquer instalação
+                futura precisa continuar cabendo aqui sem redesenho. */}
+            <Link
+              href="/"
+              aria-label={name}
+              className="flex min-w-0 shrink-0 items-center rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+            >
+              {logoUrl ? (
+                // <img> e não next/image de propósito: a URL vem do banco ou
+                // do `.env` de quem hospeda, e next/image exige allowlist de
+                // domínios fechada em build — ver o mesmo comentário em
+                // `components/shell/Sidebar.tsx`.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoUrl} alt={name} className="h-6 w-auto max-w-[8rem] object-contain sm:h-7 sm:max-w-[10rem]" />
+              ) : (
+                <span className="max-w-[40vw] truncate text-sm font-bold tracking-tight sm:max-w-[16vw]">{name}</span>
+              )}
+            </Link>
             <nav className="hidden items-center gap-6 text-sm text-muted-foreground sm:flex">
               {LINKS.map((link) => (
                 <a
