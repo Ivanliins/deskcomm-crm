@@ -57,7 +57,7 @@ export function LandingNav({ name, logoUrl }: { name: string; logoUrl: string | 
               // domínios fechada em build — ver o mesmo comentário em
               // `components/shell/Sidebar.tsx`.
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoUrl} alt={name} className="h-full w-full object-cover" />
+              <img src={logoUrl} alt={name} className="h-full w-full object-contain p-1" />
             ) : (
               name.charAt(0).toUpperCase()
             )}
