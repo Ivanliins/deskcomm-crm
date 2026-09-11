@@ -239,9 +239,15 @@ export default async function LandingPage() {
         />
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 pb-20 pt-14 sm:pb-28 sm:pt-20 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-8">
           <Reveal className="relative max-w-[680px]">
-            <p className="font-mono text-xs font-medium uppercase tracking-[0.14em] text-accent">
+            <a
+              href="#jornada"
+              className="group inline-flex items-center gap-1.5 rounded-sm font-mono text-xs font-medium uppercase tracking-[0.14em] text-accent transition-colors duration-300 hover:text-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+            >
               CRM + agentes de IA no WhatsApp
-            </p>
+              <span className="inline-block transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true">
+                →
+              </span>
+            </a>
             <h1 className={`mt-4 text-4xl font-bold leading-[1.08] tracking-tight text-balance sm:text-6xl ${styles.heroTitle}`}>
               <span className="block">Sua operação comercial numa mesa só.</span>
               <span className="block">E nada morre em cima dela.</span>
