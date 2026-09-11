@@ -240,7 +240,11 @@ export default async function LandingPage() {
       <section className="relative overflow-hidden">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute right-[-80px] top-[-60px] h-[220px] w-[220px] rounded-full bg-accent-100 opacity-70 blur-2xl sm:right-[-120px] sm:top-[-80px] sm:h-[420px] sm:w-[420px] sm:blur-3xl"
+          className="pointer-events-none absolute right-[-80px] top-[-60px] h-[260px] w-[260px] rounded-full bg-accent/25 blur-2xl sm:right-[-140px] sm:top-[-100px] sm:h-[520px] sm:w-[520px] sm:blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-[-120px] bottom-[-80px] hidden h-[360px] w-[360px] rounded-full bg-accent/10 blur-3xl lg:block"
         />
         <div className="mx-auto flex min-h-[75svh] max-w-6xl flex-col justify-end gap-12 px-6 pb-16 pt-14 sm:pb-20 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
           <Reveal className="relative max-w-[680px] lg:flex-1">
@@ -308,7 +312,7 @@ export default async function LandingPage() {
           </Reveal>
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
             <Reveal delay={80}>
-              <div className={`flex h-full flex-col gap-3 rounded-xl border border-border bg-bg p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent ${styles.floatShadow}`}>
+              <div className={`flex h-full flex-col gap-3 rounded-xl border border-border bg-surface p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent ${styles.floatShadow}`}>
                 <Table size={22} weight="duotone" className="text-accent" aria-hidden="true" />
                 <h3 className="font-semibold">O CRM que é planilha bonita</h3>
                 <p className="text-sm leading-relaxed text-pretty text-muted-foreground">
@@ -318,7 +322,7 @@ export default async function LandingPage() {
               </div>
             </Reveal>
             <Reveal delay={160}>
-              <div className={`flex h-full flex-col gap-3 rounded-xl border border-border bg-bg p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent ${styles.floatShadow}`}>
+              <div className={`flex h-full flex-col gap-3 rounded-xl border border-border bg-surface p-6 transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-accent ${styles.floatShadow}`}>
                 <Robot size={22} weight="duotone" className="text-accent" aria-hidden="true" />
                 <h3 className="font-semibold">O robô que responde e some</h3>
                 <p className="text-sm leading-relaxed text-pretty text-muted-foreground">
@@ -370,7 +374,7 @@ export default async function LandingPage() {
               return (
                 <Reveal key={plano.slug} delay={i * 80} className="h-full">
                   <div
-                    className={`relative flex h-full flex-col rounded-xl border bg-bg p-6 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-1 ${styles.floatShadow} ${
+                    className={`relative flex h-full flex-col rounded-xl border bg-surface p-6 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:-translate-y-1 ${styles.floatShadow} ${
                       destaque ? "border-accent" : "border-border"
                     }`}
                   >

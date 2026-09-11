@@ -54,8 +54,15 @@
  * `bg-bg`, `text-muted-foreground`, `bg-accent` etc. continuam os mesmos em
  * ambos os lugares, só o VALOR de cada variável muda dentro de `.landing`.
  */
+/*
+ * Transformação de direção visual (pedido explícito: "mude totalmente o
+ * layout"). A landing era clara, com o verde só como sotaque — agora o fundo
+ * é escuro e o verde vira a luz da página: brilha em vez de só marcar.
+ * Continua tudo token, então cada seção (cards, botões, badges) herda o tema
+ * novo sem precisar trocar uma classe Tailwind sequer.
+ */
 .landing {
-  color-scheme: light;
+  color-scheme: dark;
   font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   /* Sobrescreve o bridge global (Atkinson) só aqui dentro — sem isto, um
      elemento que herda `font-family` do `.landing` fica em Inter, mas quem usa
@@ -63,28 +70,29 @@
      mono) resolveria `var(--font-sans)` direto na raiz e voltaria pra Atkinson. */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
-  --color-bg: #ffffff;
-  --color-surface: #ffffff;
-  --color-surface-elevated: #f2f5f3;
-  --color-overlay: rgba(0, 0, 0, 0.5);
+  --color-bg: #07080a;
+  --color-surface: #0e1110;
+  --color-surface-elevated: #151917;
+  --color-overlay: rgba(0, 0, 0, 0.72);
 
-  --color-text: #000000;
-  --color-text-muted: rgba(0, 0, 0, 0.62);
-  --color-text-subtle: rgba(0, 0, 0, 0.44);
+  --color-text: #f4f6f4;
+  --color-text-muted: rgba(244, 246, 244, 0.66);
+  --color-text-subtle: rgba(244, 246, 244, 0.44);
 
-  --color-border: rgba(0, 0, 0, 0.1);
-  --color-border-strong: rgba(0, 0, 0, 0.18);
+  --color-border: rgba(244, 246, 244, 0.12);
+  --color-border-strong: rgba(244, 246, 244, 0.22);
 
   --color-accent: #9aff86;
-  --color-accent-fg: #000000;
-  --color-accent-hover: #7fe968;
-  --color-accent-100: #e4ffdc;
-  /* Sólida, não rgba — igual ao padrão do tema Sage original (`--color-accent-soft:
-     var(--color-accent-100)`). Um valor já semitransparente aqui quebraria os
-     `bg-accent-soft/NN` usados na página: o modificador de opacidade do Tailwind
-     multiplicaria alfa sobre alfa e o resultado ficaria quase invisível. */
+  --color-accent-fg: #051208;
+  --color-accent-hover: #b4ff9f;
+  /* Sólida, não rgba (mesma disciplina do tema claro original): um valor já
+     semitransparente aqui faria os `bg-accent-soft/NN` da página multiplicar
+     alfa sobre alfa e sumir. Verde bem escuro e dessaturado — lê como
+     "superfície com tom da marca", não como brilho (o brilho, onde precisa,
+     usa `bg-accent/NN` direto, que é sólido). */
+  --color-accent-100: #132018;
   --color-accent-soft: var(--color-accent-100);
-  --color-accent-500: #4ccb33;
+  --color-accent-500: #6dff54;
 }
 
 /* Título do hero (B5): mesma família do logo (Inter), peso 900 — o site
@@ -132,11 +140,11 @@
 }
 
 :global(.js-reveal) .word {
-  color: rgba(0, 0, 0, 0.3);
+  color: var(--color-text-subtle);
 }
 
 .word.wordActive {
-  color: #000000;
+  color: var(--color-text);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -148,7 +156,7 @@
   }
 
   :global(.js-reveal) .word {
-    color: #000000;
+    color: var(--color-text);
   }
 
   .word {
