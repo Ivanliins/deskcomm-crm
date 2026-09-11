@@ -87,17 +87,13 @@
   --color-accent-500: #4ccb33;
 }
 
-/* Título do hero (B5): único lugar da landing em que gradiente é permitido,
-   e só no TEXTO, nunca em fundo. Claro: preto → cinza, da esquerda pra direita.
-   Fonte serifada só aqui, a pedido explícito — contraste no momento de maior
-   impacto da página; o resto do site segue 100% Inter. */
+/* Título do hero (B5): mesma família do logo (Inter), peso 900 — o site
+   inteiro fala numa fonte só, a mesma da marca. Preto sólido: o gradiente
+   cinza lavava o peso que o Inter Black já entrega sozinho. */
 .heroTitle {
-  font-family: var(--font-serif-display), Georgia, serif;
-  font-weight: 400;
-  background: linear-gradient(90deg, #000000, #666666);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 900;
+  color: var(--color-text);
 }
 
 /*
