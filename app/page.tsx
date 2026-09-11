@@ -231,14 +231,16 @@ export default async function LandingPage() {
 
       <LandingNav name={name} />
 
-      {/* Hero */}
+      {/* Hero — cena de abertura em altura quase cheia, conteúdo ancorado
+          embaixo (padrão pedido: nav flutuante no topo, texto colado na base
+          da primeira dobra) em vez de centralizado no meio da seção. */}
       <section className="relative overflow-hidden">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute right-[-80px] top-[-60px] h-[220px] w-[220px] rounded-full bg-accent-100 opacity-70 blur-2xl sm:right-[-120px] sm:top-[-80px] sm:h-[420px] sm:w-[420px] sm:blur-3xl"
         />
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 pb-20 pt-14 sm:pb-28 sm:pt-20 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-8">
-          <Reveal className="relative max-w-[680px]">
+        <div className="mx-auto flex min-h-[75svh] max-w-6xl flex-col justify-end gap-12 px-6 pb-16 pt-14 sm:pb-20 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
+          <Reveal className="relative max-w-[680px] lg:flex-1">
             <a
               href="#jornada"
               className="group inline-flex items-center gap-1.5 rounded-sm font-mono text-xs font-medium uppercase tracking-[0.14em] text-accent transition-colors duration-300 hover:text-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
@@ -279,7 +281,7 @@ export default async function LandingPage() {
               Sem cartão de crédito para testar.
             </p>
           </Reveal>
-          <Reveal delay={150} className="relative flex justify-center lg:justify-end">
+          <Reveal delay={150} className="relative flex justify-center lg:shrink-0 lg:justify-end">
             <IlustracaoDaMesa />
           </Reveal>
         </div>
