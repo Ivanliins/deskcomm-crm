@@ -226,7 +226,7 @@ export default async function LandingPage() {
   if (user) redirect("/app");
 
   const { marca } = await marcaDaInstalacaoResolvida();
-  const { name } = marca;
+  const { name, logoUrl } = marca;
   const { data: planosData } = await createAdminClient()
     .from("plans")
     .select("slug, name, description, price_cents, currency, billing_interval, max_seats, max_whatsapp_numbers, max_messages_month")
@@ -240,7 +240,7 @@ export default async function LandingPage() {
           conteúdo abaixo do topo em `opacity:0` para sempre — ver page.module.css. */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-reveal')" }} />
 
-      <LandingNav name={name} />
+      <LandingNav name={name} logoUrl={logoUrl} />
 
       {/* Hero — cena de abertura em altura quase cheia, conteúdo ancorado
           embaixo (padrão pedido: nav flutuante no topo, texto colado na base
