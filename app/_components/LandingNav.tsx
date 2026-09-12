@@ -51,7 +51,7 @@ export function LandingNav({ name }: { name: string }) {
             aria-label={name}
             className="flex min-w-0 shrink-0 items-center gap-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent sm:h-10 sm:w-10">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent sm:h-10 sm:w-10">
               <svg width="18" height="18" viewBox="0 0 52 52" fill="none" className="text-accent-foreground" aria-hidden="true">
                 <path d="M10 34 L21 23 L29 31 L41 13" stroke="currentColor" strokeWidth={5.5} strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M31 13 H41 V23" stroke="currentColor" strokeWidth={5.5} strokeLinecap="round" strokeLinejoin="round" />
