@@ -8,6 +8,7 @@ import { marcaDaInstalacaoResolvida } from "@/lib/branding/instalacao";
 import { loadAuthUser } from "@/lib/auth/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Button } from "@/components/ui/button";
+import { FeatureTabs } from "./_components/FeatureTabs";
 import { LandingNav } from "./_components/LandingNav";
 import { Reveal } from "./_components/Reveal";
 import { TaglineReveal } from "./_components/TaglineReveal";
@@ -145,10 +146,20 @@ const FAQ = [
   },
 ];
 
+/** Números concretos (B... barra de estatísticas, adaptada do benefit-5 do
+ * kit SaasAble) — cada um rastreável a uma regra real do produto (ver
+ * CLAUDE.md), nunca uma média de satisfação inventada como no original. */
+const NUMEROS = [
+  { valor: "7", rotulo: "Verificações antes de cada envio" },
+  { valor: "0", rotulo: "Vazamento entre organizações — testado a cada mudança" },
+  { valor: "14 dias", rotulo: "De teste grátis, sem cartão de crédito" },
+  { valor: "24/7", rotulo: "Agentes respondendo no WhatsApp" },
+] as const;
+
 /** A ilustração do hero. Estática o bastante para nunca some sem JS/motion — a trilha e os nós contam a história sozinhos; o ponto animado só reforça. */
 function IlustracaoDaMesa() {
   return (
-    <svg viewBox="0 0 480 320" className="h-auto w-full max-w-[520px]" aria-hidden="true">
+    <svg viewBox="0 0 480 320" className="h-auto w-full max-w-[640px]" aria-hidden="true">
       <rect x="16" y="16" width="448" height="288" rx="24" className="fill-surface stroke-border" />
 
       <path d="M 115 235 C 160 215 190 195 216 175" fill="none" className="stroke-border-strong" strokeWidth={2} />
@@ -242,34 +253,46 @@ export default async function LandingPage() {
 
       <LandingNav name={name} />
 
-      {/* Hero — cena de abertura em altura quase cheia, conteúdo ancorado
-          embaixo (padrão pedido: nav flutuante no topo, texto colado na base
-          da primeira dobra) em vez de centralizado no meio da seção. */}
+      {/* Hero — estrutura centralizada (adaptada do hero-17 do kit SaasAble):
+          selo, título e chamada primeiro, com a ilustração do produto abaixo
+          em vez de ao lado. O bloco `heroDots` reproduz a textura de pontos
+          do original em `radial-gradient` puro (sem SVG externo), esmaecendo
+          antes do fim pra nunca terminar numa borda dura. Sem vídeo nem
+          captura de tela fake — a mesma decisão já tomada pro spec da
+          prosthetics-company mais cedo nesta sessão: só o layout. */}
       <section className="relative overflow-hidden">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute right-[-80px] top-4 h-[220px] w-[220px] rounded-full bg-accent-100 opacity-70 blur-2xl sm:right-[-120px] sm:top-4 sm:h-[420px] sm:w-[420px] sm:blur-3xl"
+          className={`absolute inset-x-0 top-0 z-0 h-[520px] rounded-b-[40px] bg-surface-elevated sm:h-[580px] lg:h-[620px] ${styles.heroDots}`}
         />
-        <div className="mx-auto flex min-h-[75svh] max-w-6xl flex-col justify-end gap-12 px-6 pb-16 pt-14 sm:pb-20 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
-          <Reveal className="relative max-w-[680px] lg:flex-1">
+        <div className="relative z-10 mx-auto max-w-5xl px-6 pb-20 pt-14">
+          <Reveal className="flex flex-col items-center gap-5 text-center">
             <a
               href="#jornada"
-              className="group inline-flex items-center gap-1.5 rounded-sm font-mono text-xs font-medium uppercase tracking-[0.14em] text-accent transition-colors duration-300 hover:text-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
+              className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-bg px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.14em] text-accent-500 transition-colors duration-300 hover:text-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
             >
               CRM + agentes de IA no WhatsApp
               <span className="inline-block transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true">
                 →
               </span>
             </a>
-            <h1 className={`mt-4 text-4xl font-bold leading-[1.08] tracking-tight text-balance sm:text-6xl ${styles.heroTitle}`}>
+            <h1 className={`max-w-3xl text-4xl font-bold leading-[1.08] tracking-tight text-balance sm:text-6xl ${styles.heroTitle}`}>
               <span className="block">Sua operação comercial numa mesa só.</span>
               <span className="block">E nada morre em cima dela.</span>
             </h1>
-            <p className="mt-6 max-w-md text-lg leading-relaxed text-pretty text-muted-foreground">
+            <p className="max-w-xl text-lg leading-relaxed text-pretty text-muted-foreground">
               Agentes de IA atendem no WhatsApp, qualificam o lead e movem o funil — com tudo
               registrado e auditável. Sem cobrança por usuário: seu time cresce, o plano não muda.
             </p>
-            <ul className="mt-6 flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Button asChild size="lg" className={styles.glintCta}>
+                <Link href="#precos">Começar teste grátis de 14 dias</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="#jornada">Ver como funciona</Link>
+              </Button>
+            </div>
+            <ul className="flex flex-wrap justify-center gap-2">
               {["Multi-tenant com RLS", "LGPD nativa desde o dia 1", "Sem cobrança por assento"].map((selo) => (
                 <li
                   key={selo}
@@ -279,30 +302,37 @@ export default async function LandingPage() {
                 </li>
               ))}
             </ul>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Button asChild size="lg" className={styles.glintCta}>
-                <Link href="#precos">Começar teste grátis de 14 dias</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href="#jornada">Ver como funciona</Link>
-              </Button>
-            </div>
-            <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <ShieldCheck size={15} weight="bold" className="text-accent" aria-hidden="true" />
               Sem cartão de crédito para testar.
             </p>
           </Reveal>
-          <Reveal delay={150} className="relative flex justify-center lg:shrink-0 lg:justify-end">
-            <IlustracaoDaMesa />
+          <Reveal delay={150} className="mt-14 sm:mt-16">
+            <div className={`mx-auto flex max-w-4xl items-center justify-center rounded-2xl border border-border bg-bg p-8 sm:p-12 ${styles.floatShadow}`}>
+              <IlustracaoDaMesa />
+            </div>
           </Reveal>
         </div>
       </section>
 
       {/* Tagline (B11) — o benefício central do produto, isolado como seu
-          próprio momento, ativando palavra por palavra ao rolar. */}
-      <section className="border-t border-border bg-surface-elevated/40 py-24 sm:py-32">
+          próprio momento, ativando palavra por palavra ao rolar. A barra de
+          números logo abaixo (adaptada do benefit-5 do kit SaasAble) dá prova
+          concreta pra afirmação: cada valor é rastreável a uma regra real do
+          produto (CLAUDE.md), não uma média de satisfação inventada. */}
+      <section className="border-t border-border bg-surface-elevated/40 pb-16 pt-24 sm:pb-20 sm:pt-32">
         <div className="mx-auto max-w-6xl px-6">
           <TaglineReveal lines={["Nenhum lead fica sem resposta.", "Nenhuma resposta fica sem registro."]} />
+          <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {NUMEROS.map((numero, i) => (
+              <Reveal key={numero.rotulo} delay={i * 80}>
+                <div className={`flex h-full flex-col items-center gap-1.5 rounded-xl border border-border bg-bg p-6 text-center ${styles.floatShadow}`}>
+                  <span className="font-mono text-3xl font-semibold tracking-tight text-text sm:text-4xl">{numero.valor}</span>
+                  <span className="text-xs text-pretty text-muted-foreground sm:text-sm">{numero.rotulo}</span>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -335,6 +365,23 @@ export default async function LandingPage() {
                 </p>
               </div>
             </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Recursos (adaptado do feature-18 do kit SaasAble): abas trocando um
+          painel de descrição + checklist — a resposta em produto pro
+          "problema" logo acima. Compartilha a faixa `bg-surface-elevated/40`
+          com "A vida de uma conversa" abaixo, como um único bloco de
+          "solução + mecânica", separado da "Jornada" só por um traço fino. */}
+      <section id="recursos" className="border-t border-border bg-surface-elevated/40 py-20">
+        <div className="mx-auto max-w-5xl px-6">
+          <Reveal className="max-w-xl">
+            <h2 className="text-2xl font-bold tracking-tight text-balance sm:text-3xl">O que o agente faz por você</h2>
+            <p className="mt-3 text-pretty text-muted-foreground">Quatro frentes, um único agente — sem módulo separado pra cada coisa.</p>
+          </Reveal>
+          <div className="mt-10">
+            <FeatureTabs />
           </div>
         </div>
       </section>

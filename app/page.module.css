@@ -212,3 +212,23 @@
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(154, 255, 134, 0.4);
 }
+
+/* Textura de pontos (inspirada no hero-17 do kit SaasAble, redesenhada em
+   `radial-gradient` puro em vez do SVG data-URI original) — o único lugar da
+   landing com uma textura decorativa de fundo. `mask-image` esmaece a textura
+   perto da base do bloco, pra ela nunca terminar numa borda dura contra o
+   fundo branco logo abaixo. */
+.heroDots {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.16) 1px, transparent 1px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+}
+
+/* Mesma textura, versão mais discreta e sem esmaecimento — usada dentro dos
+   painéis de ícone das abas de recursos (área menor, precisa de menos pontos
+   e de opacidade mais baixa pra não competir com o ícone). */
+.featureDots {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
