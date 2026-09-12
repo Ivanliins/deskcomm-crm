@@ -248,7 +248,7 @@ export default async function LandingPage() {
       <section className="relative overflow-hidden">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute right-[-80px] top-[-60px] h-[220px] w-[220px] rounded-full bg-accent-100 opacity-70 blur-2xl sm:right-[-120px] sm:top-[-80px] sm:h-[420px] sm:w-[420px] sm:blur-3xl"
+          className="pointer-events-none absolute right-[-80px] top-4 h-[220px] w-[220px] rounded-full bg-accent-100 opacity-70 blur-2xl sm:right-[-120px] sm:top-4 sm:h-[420px] sm:w-[420px] sm:blur-3xl"
         />
         <div className="mx-auto flex min-h-[75svh] max-w-6xl flex-col justify-end gap-12 px-6 pb-16 pt-14 sm:pb-20 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
           <Reveal className="relative max-w-[680px] lg:flex-1">

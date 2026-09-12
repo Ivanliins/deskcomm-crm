@@ -39,68 +39,71 @@ export function LandingNav({ name }: { name: string }) {
   return (
     <>
       <header className="sticky top-0 z-40 flex justify-center px-4 pt-4 sm:pt-6">
-        <div className="flex w-full max-w-3xl items-center gap-2 sm:gap-3">
-          {/* Selo circular — mesmo desenho do ícone da aba (`app/icon.tsx`)
-              e do cartão de compartilhamento: cor de destaque + a seta, nunca
-              uma imagem fixa, porque o produto é white-label e o selo precisa
-              continuar fazendo sentido em qualquer marca. */}
+        <div
+          className={`flex w-full max-w-3xl items-center justify-between gap-3 rounded-full border border-border bg-accent-100/70 py-2 pl-3 pr-2 backdrop-blur-xl sm:gap-6 sm:pl-4 ${styles.floatShadow}`}
+        >
+          {/* Logo completo — selo (mesmo desenho do favicon e do cartão de
+              compartilhamento: cor de destaque + a seta, nunca uma imagem
+              fixa) e o nome, juntos, como UMA marca — não um selo solto ao
+              lado de um texto genérico. */}
           <Link
             href="/"
             aria-label={name}
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:h-11 sm:w-11 ${styles.floatShadow}`}
+            className="flex min-w-0 shrink-0 items-center gap-2.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
           >
-            <svg width="20" height="20" viewBox="0 0 52 52" fill="none" className="text-accent-foreground" aria-hidden="true">
-              <path d="M10 34 L21 23 L29 31 L41 13" stroke="currentColor" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M31 13 H41 V23" stroke="currentColor" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent sm:h-10 sm:w-10">
+              <svg width="18" height="18" viewBox="0 0 52 52" fill="none" className="text-accent-foreground" aria-hidden="true">
+                <path d="M10 34 L21 23 L29 31 L41 13" stroke="currentColor" strokeWidth={5.5} strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M31 13 H41 V23" stroke="currentColor" strokeWidth={5.5} strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <span className="hidden max-w-[24vw] items-baseline gap-1.5 truncate sm:flex">
+              <span className="truncate text-base font-bold tracking-tight text-text">UpFlow</span>
+              <span className="text-xs font-medium text-muted-foreground">CRM</span>
+            </span>
           </Link>
-          <div
-            className={`flex min-w-0 flex-1 items-center justify-between gap-3 rounded-full border border-border bg-accent-100/70 py-2 pl-4 pr-2 backdrop-blur-xl sm:gap-6 sm:pl-5 ${styles.floatShadow}`}
-          >
-            <span className="hidden max-w-[16vw] truncate text-sm font-bold tracking-tight sm:inline">{name}</span>
-            <nav className="hidden items-center gap-6 text-sm text-muted-foreground sm:flex">
-              {LINKS.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="rounded-sm transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </nav>
-            <div className="flex items-center gap-2">
-              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-                <Link href="/login">Entrar</Link>
-              </Button>
-              <Button asChild size="sm" className={styles.glintCta}>
-                <Link href="#precos">
-                  <span className="hidden sm:inline">Começar teste grátis</span>
-                  <span className="sm:hidden">Testar grátis</span>
-                </Link>
-              </Button>
-              <button
-                type="button"
-                aria-expanded={open}
-                aria-controls="menu-mobile"
-                aria-label={open ? "Fechar menu" : "Abrir menu"}
-                onClick={() => setOpen((v) => !v)}
-                className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-300 hover:bg-surface-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:hidden"
+          <nav className="hidden items-center gap-6 text-sm text-muted-foreground sm:flex">
+            {LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="rounded-sm transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
               >
-                <span className="relative block h-3.5 w-4">
-                  <span
-                    className={`absolute left-0 top-0 h-[1.5px] w-4 bg-text transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-                      open ? "translate-y-[6.5px] rotate-45" : ""
-                    }`}
-                  />
-                  <span
-                    className={`absolute bottom-0 left-0 h-[1.5px] w-4 bg-text transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
-                      open ? "-translate-y-[6.5px] -rotate-45" : ""
-                    }`}
-                  />
-                </span>
-              </button>
-            </div>
+                {link.label}
+              </a>
+            ))}
+          </nav>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+              <Link href="/login">Entrar</Link>
+            </Button>
+            <Button asChild size="sm" className={styles.glintCta}>
+              <Link href="#precos">
+                <span className="hidden sm:inline">Começar teste grátis</span>
+                <span className="sm:hidden">Testar grátis</span>
+              </Link>
+            </Button>
+            <button
+              type="button"
+              aria-expanded={open}
+              aria-controls="menu-mobile"
+              aria-label={open ? "Fechar menu" : "Abrir menu"}
+              onClick={() => setOpen((v) => !v)}
+              className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors duration-300 hover:bg-surface-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:hidden"
+            >
+              <span className="relative block h-3.5 w-4">
+                <span
+                  className={`absolute left-0 top-0 h-[1.5px] w-4 bg-text transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                    open ? "translate-y-[6.5px] rotate-45" : ""
+                  }`}
+                />
+                <span
+                  className={`absolute bottom-0 left-0 h-[1.5px] w-4 bg-text transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                    open ? "-translate-y-[6.5px] -rotate-45" : ""
+                  }`}
+                />
+              </span>
+            </button>
           </div>
         </div>
       </header>
