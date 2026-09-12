@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 
+import { SELO_SETA_PATHS, SELO_SETA_VIEWBOX } from "@/lib/branding/marca-icone-svg";
 import { marcaDaSaida } from "@/lib/branding/saida";
 
 /**
@@ -13,7 +14,8 @@ import { marcaDaSaida } from "@/lib/branding/saida";
  * `marcaDaSaida()` e não `logo_url`: mesma razão do ícone — campo livre, sem
  * CHECK de host, e buscá-lo aqui seria uma requisição de saída disparada por
  * todo crawler de link preview, com a URL vindo de um campo que o operador
- * digita. Cor + inicial + nome não toca a rede.
+ * digita. Cor + selo (`lib/branding/marca-icone-svg.ts`) + nome não toca a
+ * rede.
  *
  * `force-dynamic` pela mesma razão do ícone: sem isto o `next build` congela
  * a imagem dentro da imagem Docker pré-buildada, com a marca de quem buildou
@@ -52,16 +54,17 @@ export default async function OpengraphImage() {
             display: "flex",
             width: 88,
             height: 88,
-            borderRadius: 16,
+            borderRadius: 20,
             background: marca.accent,
-            color: marca.accentFg,
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 44,
-            fontWeight: 700,
           }}
         >
-          {marca.nome.charAt(0).toUpperCase()}
+          <svg width={48} height={48} viewBox={SELO_SETA_VIEWBOX} fill="none">
+            {SELO_SETA_PATHS.map((d) => (
+              <path key={d} d={d} stroke={marca.accentFg} strokeWidth={4.5} strokeLinecap="round" strokeLinejoin="round" />
+            ))}
+          </svg>
         </div>
         <div
           style={{

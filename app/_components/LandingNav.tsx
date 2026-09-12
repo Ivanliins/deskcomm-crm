@@ -40,16 +40,19 @@ export function LandingNav({ name }: { name: string }) {
     <>
       <header className="sticky top-0 z-40 flex justify-center px-4 pt-4 sm:pt-6">
         <div className="flex w-full max-w-3xl items-center gap-2 sm:gap-3">
-          {/* Pílula circular com a inicial do nome — a mesma ideia do ícone
-              da aba (`app/icon.tsx`): cor de destaque + inicial, nunca uma
-              imagem fixa, porque o produto é white-label e qualquer nome
-              futuro precisa continuar cabendo aqui sem redesenho. */}
+          {/* Selo circular — mesmo desenho do ícone da aba (`app/icon.tsx`)
+              e do cartão de compartilhamento: cor de destaque + a seta, nunca
+              uma imagem fixa, porque o produto é white-label e o selo precisa
+              continuar fazendo sentido em qualquer marca. */}
           <Link
             href="/"
             aria-label={name}
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:h-11 sm:w-11 ${styles.floatShadow}`}
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:h-11 sm:w-11 ${styles.floatShadow}`}
           >
-            {name.charAt(0).toUpperCase()}
+            <svg width="20" height="20" viewBox="0 0 52 52" fill="none" className="text-accent-foreground" aria-hidden="true">
+              <path d="M10 34 L21 23 L29 31 L41 13" stroke="currentColor" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M31 13 H41 V23" stroke="currentColor" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </Link>
           <div
             className={`flex min-w-0 flex-1 items-center justify-between gap-3 rounded-full border border-border bg-accent-100/70 py-2 pl-4 pr-2 backdrop-blur-xl sm:gap-6 sm:pl-5 ${styles.floatShadow}`}
