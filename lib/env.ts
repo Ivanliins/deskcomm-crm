@@ -313,6 +313,12 @@ const schema = z.object({
     .string()
     .url()
     .default("http://localhost:3000"),
+  /**
+   * Landing externa (ex.: site de marketing em outro domínio). Quando definida,
+   * o visitante ANÔNIMO que abre `/` é mandado para ela em vez de ver a landing
+   * embutida. Vazio = comportamento de sempre (a landing deste repo).
+   */
+  LANDING_URL: z.union([z.literal(""), z.string().url()]).optional().default(""),
 
   // Marca da instalação (white-label) — ver lib/branding.ts.
   // Sem prefixo NEXT_PUBLIC_ de propósito: essas seriam queimadas no bundle

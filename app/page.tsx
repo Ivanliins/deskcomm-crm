@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { CaretDown, Check, Robot, ShieldCheck, Table } from "@phosphor-icons/react/ssr";
 
 import { marcaDaInstalacaoResolvida } from "@/lib/branding/instalacao";
+import { env } from "@/lib/env";
 import { loadAuthUser } from "@/lib/auth/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Button } from "@/components/ui/button";
@@ -236,6 +237,8 @@ function IlustracaoDaMesa() {
 export default async function LandingPage() {
   const user = await loadAuthUser();
   if (user) redirect("/app");
+  // Landing em domínio próprio (LANDING_URL): o anônimo vai para lá.
+  if (env.LANDING_URL) redirect(env.LANDING_URL);
 
   const { marca } = await marcaDaInstalacaoResolvida();
   const { name } = marca;
