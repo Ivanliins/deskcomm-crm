@@ -10,6 +10,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { Button } from "@/components/ui/button";
 import { FeatureTabs } from "./_components/FeatureTabs";
 import { LandingNav } from "./_components/LandingNav";
+import { LandingMotion } from "./_components/motion/LandingMotion";
 import { Reveal } from "./_components/Reveal";
 import { TaglineReveal } from "./_components/TaglineReveal";
 import styles from "./page.module.css";
@@ -246,10 +247,11 @@ export default async function LandingPage() {
   const planos = (planosData ?? []) as PlanoPublico[];
 
   return (
-    <div className={`${styles.landing} ${inter.variable} ${instrumentSerif.variable} min-h-screen bg-bg text-text`}>
+    <div data-landing className={`${styles.landing} ${inter.variable} ${instrumentSerif.variable} min-h-screen bg-bg text-text`}>
       {/* Sem isto, JS desligado ou que falhe antes de hidratar deixa todo
           conteúdo abaixo do topo em `opacity:0` para sempre — ver page.module.css. */}
       <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js-reveal')" }} />
+      <LandingMotion />
 
       <LandingNav name={name} />
 
@@ -266,8 +268,12 @@ export default async function LandingPage() {
           className={`absolute inset-x-0 top-0 z-0 h-[520px] rounded-b-[40px] bg-surface-elevated sm:h-[580px] lg:h-[620px] ${styles.heroDots}`}
         />
         <div className="relative z-10 mx-auto max-w-5xl px-6 pb-20 pt-14">
-          <Reveal className="flex flex-col items-center gap-5 text-center">
+          {/* Entrada animada por motion/hero.ts, não por <Reveal>: o título
+              precisa ser quebrado em palavras, e os dois mecanismos brigariam
+              pela mesma opacidade. */}
+          <div className="flex flex-col items-center gap-5 text-center">
             <a
+              data-anim="hero"
               href="#jornada"
               className="group inline-flex items-center gap-1.5 rounded-full border border-border bg-bg px-3 py-1.5 font-mono text-xs font-medium uppercase tracking-[0.14em] text-accent-500 transition-colors duration-300 hover:text-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
             >
@@ -276,15 +282,15 @@ export default async function LandingPage() {
                 →
               </span>
             </a>
-            <h1 className={`max-w-3xl text-4xl font-bold leading-[1.08] tracking-tight text-balance sm:text-6xl ${styles.heroTitle}`}>
+            <h1 data-anim="hero-titulo" className={`max-w-3xl text-4xl font-bold leading-[1.08] tracking-tight text-balance sm:text-6xl ${styles.heroTitle}`}>
               <span className="block">Sua operação comercial numa mesa só.</span>
               <span className="block">E nada morre em cima dela.</span>
             </h1>
-            <p className="max-w-xl text-lg leading-relaxed text-pretty text-muted-foreground">
+            <p data-anim="hero" className="max-w-xl text-lg leading-relaxed text-pretty text-muted-foreground">
               Agentes de IA atendem no WhatsApp, qualificam o lead e movem o funil — com tudo
               registrado e auditável. Sem cobrança por usuário: seu time cresce, o plano não muda.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-3">
+            <div data-anim="hero" className="flex flex-wrap items-center justify-center gap-3">
               <Button asChild size="lg" className={styles.glintCta}>
                 <Link href="#precos">Começar teste grátis de 14 dias</Link>
               </Button>
@@ -292,7 +298,7 @@ export default async function LandingPage() {
                 <Link href="#jornada">Ver como funciona</Link>
               </Button>
             </div>
-            <ul className="flex flex-wrap justify-center gap-2">
+            <ul data-anim="hero" className="flex flex-wrap justify-center gap-2">
               {["Multi-tenant com RLS", "LGPD nativa desde o dia 1", "Sem cobrança por assento"].map((selo) => (
                 <li
                   key={selo}
@@ -302,16 +308,17 @@ export default async function LandingPage() {
                 </li>
               ))}
             </ul>
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <p data-anim="hero" className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <ShieldCheck size={15} weight="bold" className="text-accent" aria-hidden="true" />
               Sem cartão de crédito para testar.
             </p>
-          </Reveal>
-          <Reveal delay={150} className="mt-14 sm:mt-16">
-            <div className={`mx-auto flex max-w-4xl items-center justify-center rounded-2xl border border-border bg-bg p-8 sm:p-12 ${styles.floatShadow}`}>
-              <IlustracaoDaMesa />
-            </div>
-          </Reveal>
+          </div>
+          <div
+            data-anim="hero"
+            className={`mx-auto mt-14 flex max-w-4xl items-center justify-center rounded-2xl border border-border bg-bg p-8 sm:mt-16 sm:p-12 ${styles.floatShadow}`}
+          >
+            <IlustracaoDaMesa />
+          </div>
         </div>
       </section>
 
@@ -327,7 +334,9 @@ export default async function LandingPage() {
             {NUMEROS.map((numero, i) => (
               <Reveal key={numero.rotulo} delay={i * 80}>
                 <div className={`flex h-full flex-col items-center gap-1.5 rounded-xl border border-border bg-bg p-6 text-center ${styles.floatShadow}`}>
-                  <span className="font-mono text-3xl font-semibold tracking-tight text-text sm:text-4xl">{numero.valor}</span>
+                  <span data-anim="numero" className="font-mono text-3xl font-semibold tracking-tight text-text sm:text-4xl">
+                    {numero.valor}
+                  </span>
                   <span className="text-xs text-pretty text-muted-foreground sm:text-sm">{numero.rotulo}</span>
                 </div>
               </Reveal>
@@ -387,16 +396,29 @@ export default async function LandingPage() {
       </section>
 
       {/* A vida de uma conversa — sequência real, por isso leva trilho numerado */}
-      <section id="jornada" className="border-t border-border bg-surface-elevated/40 py-20">
+      <section id="jornada" data-anim="jornada" className="border-t border-border bg-surface-elevated/40 py-20">
         <div className="mx-auto max-w-6xl px-6">
           <Reveal className="max-w-lg">
             <h2 className="text-2xl font-bold tracking-tight text-balance sm:text-3xl">A vida de uma conversa</h2>
             <p className="mt-3 text-pretty text-muted-foreground">O que acontece, em ordem, do primeiro "oi" até o funil se mexer sozinho.</p>
           </Reveal>
-          <ol className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+          <ol className="relative mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Fio que liga as quatro etapas no desktop, desenhado pela rolagem
+                (motion/jornada.ts). Sem JS ele já nasce inteiro. Altura de 2px
+                igual à do viewBox: a escala vertical fica 1 e o traço não
+                engorda com `preserveAspectRatio="none"`. `z-10` porque as
+                bordas das etapas pintariam por cima dele. */}
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 100 2"
+              preserveAspectRatio="none"
+              className="pointer-events-none absolute inset-x-0 top-0 z-10 hidden h-0.5 w-full lg:block"
+            >
+              <path data-anim="jornada-linha" d="M0 1 H100" fill="none" strokeWidth={2} className="stroke-accent" />
+            </svg>
             {JORNADA.map((etapa, i) => (
-              <li key={etapa.titulo}>
-                <Reveal delay={i * 90} className="relative border-t-2 border-accent pt-4">
+              <li key={etapa.titulo} data-anim="jornada-etapa">
+                <Reveal delay={i * 90} className="relative border-t-2 border-accent pt-4 lg:border-border-strong">
                   <span className="font-mono text-xs font-semibold tabular-nums text-accent">
                     {String(i + 1).padStart(2, "0")}
                   </span>
