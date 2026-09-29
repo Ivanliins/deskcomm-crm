@@ -1,0 +1,95 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Tema UpFlow — camada VISUAL por cima do design system.
+
+   Só troca VALORES de tokens que o `app/globals.css` já declara (fundos,
+   texto, bordas, neutros e cores de estado), para o painel seguir a
+   identidade do site (upflowcrm.com.br): cinza-claro frio, cartões brancos,
+   texto quase preto e, no escuro, o azul-noite do site.
+
+   O que ele NÃO faz, de propósito:
+   - Não mexe no accent. A cor de destaque vem do caminho suportado de marca
+     (`APP_ACCENT_HEX` / tela de Marca), que deriva a rampa e o contraste.
+   - Não toca no `globals.css`: a régua de contraste e os testes que medem a
+     paleta do produto continuam lendo o original.
+
+   Para desligar: remover o `import "./tema-upflow.css"` de `app/layout.tsx`.
+
+   Especificidade: `:root:root` (0,2,0) vence o `:root` do globals.css sem
+   `!important`; é a mesma que a marca injetada usa, e as duas camadas não
+   disputam chave nenhuma (esta não declara `--color-accent*`).
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root:root,
+[data-theme="light"][data-theme="light"] {
+  --color-bg: #f2f5f3;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f6f8f7;
+  --color-overlay: rgba(5, 7, 11, 0.45);
+
+  --color-text: #0b0f17;
+  --color-text-muted: #4a514d;
+  --color-text-subtle: #6b736f;
+
+  --color-border: #e3e8e5;
+  --color-border-strong: #cdd4d0;
+
+  --color-neutral-50: #f6f8f7;
+  --color-neutral-100: #eef2f0;
+  --color-neutral-200: #e3e8e5;
+  --color-neutral-300: #cdd4d0;
+  --color-neutral-400: #a3aca7;
+  --color-neutral-500: #6b736f;
+  --color-neutral-600: #4a514d;
+  --color-neutral-700: #363c39;
+  --color-neutral-800: #22272a;
+  --color-neutral-900: #0b0f17;
+  --color-neutral-950: #05070b;
+
+  /* Estados — apoio funcional do manual (sucesso, atenção, erro) */
+  --color-success: #4f9a2a;
+  --color-success-bg: rgba(111, 190, 60, 0.14);
+  --color-success-fg: #3e7b17;
+  --color-warning: #c8841e;
+  --color-warning-bg: rgba(232, 163, 61, 0.16);
+  --color-warning-fg: #8a5a12;
+  --color-error: #c23a2e;
+  --color-error-bg: rgba(217, 72, 59, 0.12);
+  --color-error-fg: #a8322a;
+}
+
+:root:root[data-theme="dark"],
+[data-theme="dark"][data-theme="dark"] {
+  --color-bg: #05070b;
+  --color-surface: #0b0f17;
+  --color-surface-elevated: #121824;
+  --color-overlay: rgba(0, 0, 0, 0.6);
+
+  --color-text: #f5f7f6;
+  --color-text-muted: #9aa3a0;
+  --color-text-subtle: #69716e;
+
+  --color-border: #1c2330;
+  --color-border-strong: #2a3240;
+
+  --color-neutral-50: #f5f7f6;
+  --color-neutral-100: #e3e8e5;
+  --color-neutral-200: #b7bfbb;
+  --color-neutral-300: #9aa3a0;
+  --color-neutral-400: #69716e;
+  --color-neutral-500: #2a3240;
+  --color-neutral-600: #1c2330;
+  --color-neutral-700: #121824;
+  --color-neutral-800: #0b0f17;
+  --color-neutral-900: #05070b;
+  --color-neutral-950: #020305;
+
+  --color-success: #8fd35f;
+  --color-success-bg: rgba(166, 240, 117, 0.14);
+  --color-success-fg: #a6f075;
+  --color-warning: #e8a33d;
+  --color-warning-bg: rgba(232, 163, 61, 0.16);
+  --color-warning-fg: #f0bd6e;
+  --color-error: #e0655a;
+  --color-error-bg: rgba(217, 72, 59, 0.18);
+  --color-error-fg: #ef8b82;
+}
