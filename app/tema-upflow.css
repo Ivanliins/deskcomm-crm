@@ -6,17 +6,23 @@
    identidade do site (upflowcrm.com.br): cinza-claro frio, cartões brancos,
    texto quase preto e, no escuro, o azul-noite do site.
 
-   O que ele NÃO faz, de propósito:
-   - Não mexe no accent. A cor de destaque vem do caminho suportado de marca
-     (`APP_ACCENT_HEX` / tela de Marca), que deriva a rampa e o contraste.
-   - Não toca no `globals.css`: a régua de contraste e os testes que medem a
-     paleta do produto continuam lendo o original.
+   Accent: a cor vem do caminho suportado (`APP_ACCENT_HEX=#A6F075`), que
+   deriva a rampa. No tema CLARO, porém, o derivador escurece verdes claros
+   (contraste não-textual contra o fundo) e o botão sairia verde-escuro com
+   texto branco. O manual da marca pede o contrário — "verde sempre com texto
+   preto" —, então o bloco claro abaixo fixa o verde UpFlow no accent e deixa
+   os graus 500+ escuros: `--ring` e os `ring-accent-500` dos componentes
+   continuam visíveis (>= 3:1 sobre o fundo). O tema escuro usa a derivação.
+
+   Não toca no `globals.css`: a régua de contraste e os testes que medem a
+   paleta do produto continuam lendo o original.
 
    Para desligar: remover o `import "./tema-upflow.css"` de `app/layout.tsx`.
 
    Especificidade: `:root:root` (0,2,0) vence o `:root` do globals.css sem
-   `!important`; é a mesma que a marca injetada usa, e as duas camadas não
-   disputam chave nenhuma (esta não declara `--color-accent*`).
+   `!important`. A marca injetada (`<style id="marca-instalacao">`) usa a mesma
+   e fica DEPOIS das folhas de estilo no <head>, então ela vence empates — por
+   isso o bloco do accent, no fim do arquivo, usa um seletor mais forte.
    ───────────────────────────────────────────────────────────────────────── */
 
 :root:root,
@@ -92,4 +98,28 @@
   --color-error: #e0655a;
   --color-error-bg: rgba(217, 72, 59, 0.18);
   --color-error-fg: #ef8b82;
+}
+
+/* Accent do tema CLARO — verde UpFlow com texto preto (ver cabeçalho).
+   Seletor mais forte que o `:root:root` da marca injetada, que no <head> vem
+   DEPOIS das folhas de estilo e por isso venceria um empate. O `:not()` deixa
+   o tema escuro com a derivação do sistema. */
+:root:root:root:not([data-theme="dark"]),
+[data-theme="light"][data-theme="light"][data-theme="light"] {
+  --color-accent-50: #f3fdeb;
+  --color-accent-100: #e6fbd4;
+  --color-accent-200: #cff6ae;
+  --color-accent-300: #a6f075;
+  --color-accent-400: #8fd35f;
+  --color-accent-500: #4f9a2a;
+  --color-accent-600: #3e7b17;
+  --color-accent-700: #2f5e12;
+  --color-accent-800: #22440d;
+  --color-accent-900: #1a3509;
+  --color-accent-950: #0e1d05;
+  --color-accent: #a6f075;
+  --color-accent-fg: #000000;
+  --color-accent-hover: #95e05f;
+  --color-accent-soft: #e6fbd4;
+  --ring: #3e7b17;
 }
