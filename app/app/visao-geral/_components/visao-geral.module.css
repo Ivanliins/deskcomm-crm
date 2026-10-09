@@ -1,0 +1,265 @@
+/*
+ * Visão geral — o que os utilitários do Tailwind não dizem sozinhos.
+ *
+ * Só TOKENS aqui: a cor de destaque vem de `--color-accent` (que a marca da
+ * instalação ou da organização pode trocar), e o resto da paleta sai da régua
+ * do produto. O cartão "tinta" (IA ao vivo) é a âncora escura da tela nos dois
+ * temas: no claro é o quase-preto da marca; no escuro, uma superfície elevada
+ * com borda — preto sobre azul-noite sumiria.
+ */
+
+.raiz {
+  --vg-tinta: var(--color-neutral-900);
+  --vg-tinta-texto: var(--color-neutral-50);
+  --vg-tinta-suave: var(--color-neutral-300);
+  --vg-tinta-linha: var(--color-neutral-800);
+  --vg-tinta-borda: var(--color-neutral-900);
+
+  /* Barras: IA na cor da marca, equipe em tinta. No claro, o verde-limão
+     sobre branco não tem contraste de objeto gráfico (WCAG 1.4.11) — a borda
+     escura é o que separa a barra do fundo. */
+  --vg-ia: var(--color-accent);
+  --vg-ia-borda: var(--color-accent-600);
+  --vg-equipe: var(--color-neutral-900);
+  --vg-trilho: var(--color-neutral-100);
+  --vg-grade: var(--color-border);
+}
+
+:global([data-theme="dark"]) .raiz {
+  --vg-tinta: var(--color-surface-elevated);
+  --vg-tinta-texto: var(--color-text);
+  --vg-tinta-suave: var(--color-text-muted);
+  --vg-tinta-linha: var(--color-border);
+  --vg-tinta-borda: var(--color-border-strong);
+
+  --vg-ia-borda: var(--color-accent);
+  --vg-equipe: var(--color-neutral-300);
+  --vg-trilho: var(--color-neutral-600);
+}
+
+/* ── Entrada: escondido até o GSAP assumir (ver `movimento.ts`) ───────────
+   Só com movimento permitido; com `reduce` a tela nasce pronta. A animação de
+   segurança revela tudo sozinha se o módulo de movimento não chegar em 2,5s —
+   uma falha de rede não pode deixar o painel invisível. */
+@media (prefers-reduced-motion: no-preference) {
+  .raiz[data-movimento="pendente"] [data-vg-entra] {
+    opacity: 0;
+    animation: vg-mostrar 0.01s linear 2.5s forwards;
+  }
+}
+
+@keyframes vg-mostrar {
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Cartões ─────────────────────────────────────────────────────────────── */
+.cartao {
+  transition:
+    transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .cartao:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-strong);
+  }
+}
+
+/* O brilho de quando um número muda na atualização automática. */
+.realce {
+  box-shadow: 0 0 0 1px var(--color-accent), var(--shadow-md);
+}
+
+.tinta {
+  background: var(--vg-tinta);
+  color: var(--vg-tinta-texto);
+  border: 1px solid var(--vg-tinta-borda);
+}
+
+.tintaSuave {
+  color: var(--vg-tinta-suave);
+}
+
+.tintaLinha {
+  border-color: var(--vg-tinta-linha);
+}
+
+.tintaHover {
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.tintaHover:hover {
+  background: color-mix(in oklab, var(--vg-tinta-texto) 7%, transparent);
+}
+
+.tintaAvatar {
+  background: var(--vg-tinta-linha);
+  color: var(--vg-tinta-texto);
+}
+
+/* ── Ponto "ao vivo" ─────────────────────────────────────────────────────── */
+.vivo {
+  position: relative;
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--color-success);
+}
+
+.vivoNaTinta {
+  background: var(--color-accent-fg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .vivo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: inherit;
+    animation: vg-pulso 2.4s var(--ease-out) infinite;
+  }
+}
+
+@keyframes vg-pulso {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* ── Gráfico ─────────────────────────────────────────────────────────────── */
+.grafico {
+  background-image: linear-gradient(to top, var(--vg-grade) 1px, transparent 1px);
+  background-size: 100% 25%;
+}
+
+.coluna {
+  outline: none;
+}
+
+.coluna:focus-visible .pilha,
+.coluna:hover .pilha {
+  filter: brightness(1.06) saturate(1.05);
+}
+
+.coluna:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.pilha {
+  transform-origin: 50% 100%;
+  transition: filter var(--duration-fast) var(--ease-out);
+}
+
+.barraIa {
+  background: var(--vg-ia);
+  box-shadow: inset 0 0 0 1px var(--vg-ia-borda);
+}
+
+.barraEquipe {
+  background: var(--vg-equipe);
+}
+
+.barraVazia {
+  border: 1px dashed var(--color-border-strong);
+  border-bottom: 0;
+}
+
+.amostraIa {
+  background: var(--vg-ia);
+  box-shadow: inset 0 0 0 1px var(--vg-ia-borda);
+}
+
+.amostraEquipe {
+  background: var(--vg-equipe);
+}
+
+.dica {
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.coluna:hover .dica,
+.coluna:focus-visible .dica {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ── Funil ───────────────────────────────────────────────────────────────── */
+.trilho {
+  background: var(--vg-trilho);
+}
+
+.barraFunil {
+  transform-origin: 0 50%;
+  background: color-mix(in oklab, var(--vg-equipe) var(--vg-forca, 100%), transparent);
+}
+
+.barraGanha {
+  transform-origin: 0 50%;
+  background: var(--vg-ia);
+  box-shadow: inset 0 0 0 1px var(--vg-ia-borda);
+}
+
+/* ── Sparkline ───────────────────────────────────────────────────────────── */
+.spark {
+  overflow: visible;
+}
+
+.sparkLinha {
+  stroke: var(--color-accent-500);
+}
+
+:global([data-theme="dark"]) .sparkLinha {
+  stroke: var(--color-accent);
+}
+
+.sparkArea {
+  fill: var(--color-accent);
+  opacity: 0.16;
+}
+
+.sparkPonto {
+  fill: var(--color-accent-500);
+}
+
+:global([data-theme="dark"]) .sparkPonto {
+  fill: var(--color-accent);
+}
+
+/* ── Pílula "automático atendendo" ───────────────────────────────────────── */
+.pilulaIa {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-800);
+}
+
+.pontoIa {
+  background: var(--color-accent-600);
+}
+
+:global([data-theme="dark"]) .pilulaIa {
+  background: color-mix(in oklab, var(--color-accent) 16%, transparent);
+  color: var(--color-accent);
+}
+
+:global([data-theme="dark"]) .pontoIa {
+  background: var(--color-accent);
+}

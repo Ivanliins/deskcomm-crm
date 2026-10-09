@@ -90,9 +90,18 @@ export function interfaceTemDestino(
 ): boolean {
   return destinosDaInterface(settings, platform, role).some((d) => !essencial(d, role, platform));
 }
+/**
+ * A primeira tela depois do login. Quem GERE (manager+ e plataforma) abre na
+ * Visão geral, que é o resumo do período; quem atende abre no Inbox, onde o
+ * trabalho dele está. Os dois só valem se a interface do vínculo mostra a tela —
+ * uma seleção granular sem a Visão geral continua caindo no Inbox, e assim por
+ * diante.
+ */
 export function homeDaInterface(raw: unknown, platform: boolean, role: Role | null): string {
   const visible = destinosDaInterface(raw, platform, role);
+  const gere = platform || (!!role && ROLE_RANK[role] >= ROLE_RANK.manager);
   return (
+    (gere ? visible.find((d) => d.href === "/app/visao-geral")?.href : undefined) ??
     visible.find((d) => d.href === "/app/inbox")?.href ??
     visible.find((d) => !essencial(d, role, platform))?.href ??
     "/app/settings/profile"

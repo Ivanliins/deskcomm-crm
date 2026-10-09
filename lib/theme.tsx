@@ -2,15 +2,23 @@
 
 import * as React from "react";
 
-export type Theme = "light" | "dark" | "system";
+import { msAteAProximaVirada, temaDaHora } from "@/lib/tema-da-hora";
+
+/**
+ * `auto` segue a HORA DO DIA (claro das 6h às 18h, escuro fora disso — regra em
+ * `lib/tema-da-hora.ts`) e é o padrão de quem nunca escolheu. `system` continua
+ * existindo e seguindo o `prefers-color-scheme`: quem já o escolheu não perde a
+ * escolha porque o padrão mudou.
+ */
+export type Theme = "auto" | "light" | "dark" | "system";
 export type ResolvedTheme = "light" | "dark";
 
 const STORAGE_KEY = "deskcomm-theme";
 
 type ThemeContextValue = {
-  /** User preference: light, dark, or system. */
+  /** User preference: auto (hora do dia), light, dark, or system. */
   theme: Theme;
-  /** Effective theme applied to the DOM (system collapsed to light/dark). */
+  /** Effective theme applied to the DOM (auto/system collapsed to light/dark). */
   resolvedTheme: ResolvedTheme;
   setTheme: (theme: Theme) => void;
   toggle: () => void;
@@ -19,14 +27,14 @@ type ThemeContextValue = {
 const ThemeContext = React.createContext<ThemeContextValue | null>(null);
 
 function readStoredTheme(): Theme {
-  if (typeof window === "undefined") return "system";
+  if (typeof window === "undefined") return "auto";
   try {
     const v = window.localStorage.getItem(STORAGE_KEY);
-    if (v === "light" || v === "dark" || v === "system") return v;
+    if (v === "auto" || v === "light" || v === "dark" || v === "system") return v;
   } catch {
     // localStorage indisponível (modo privado, sandbox) — segue com default.
   }
-  return "system";
+  return "auto";
 }
 
 function getSystemTheme(): ResolvedTheme {
@@ -34,9 +42,54 @@ function getSystemTheme(): ResolvedTheme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
+function getHourTheme(): ResolvedTheme {
+  if (typeof window === "undefined") return "light";
+  return temaDaHora();
+}
+
+function resolve(theme: Theme, system: ResolvedTheme, hour: ResolvedTheme): ResolvedTheme {
+  if (theme === "auto") return hour;
+  if (theme === "system") return system;
+  return theme;
+}
+
+/**
+ * Aplica no `<html>`. A troca é um cross-fade quando o navegador tem View
+ * Transitions e a pessoa não pediu menos movimento — é o que faz a virada das
+ * 18h acontecer sem um "piscar" no meio do trabalho.
+ *
+ * Só troca quando o valor MUDA: no primeiro efeito depois da hidratação o script
+ * anti-flash do layout já deixou o atributo certo, e uma transição ali seria um
+ * fade de uma tela para ela mesma.
+ *
+ * Com a aba OCULTA não há transição: o navegador a aborta (InvalidStateError) e
+ * as promessas dela rejeitam sem ninguém ouvir — medido na vitrine, quatro erros
+ * "Uncaught (in promise)" por troca. A virada das 18h numa aba esquecida em
+ * segundo plano é justamente esse caso. As promessas ainda são "ouvidas" porque
+ * o navegador também aborta por outros motivos (outra transição começando).
+ */
 function applyTheme(resolved: ResolvedTheme) {
   if (typeof document === "undefined") return;
-  document.documentElement.setAttribute("data-theme", resolved);
+  const root = document.documentElement;
+  if (root.getAttribute("data-theme") === resolved) return;
+  const swap = () => root.setAttribute("data-theme", resolved);
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const doc = document as Document & {
+    startViewTransition?: (update: () => void) => {
+      ready: Promise<void>;
+      finished: Promise<void>;
+      updateCallbackDone: Promise<void>;
+    };
+  };
+  if (!reduced && document.visibilityState === "visible" && typeof doc.startViewTransition === "function") {
+    const transicao = doc.startViewTransition(swap);
+    const ignorar = () => {};
+    transicao.ready.catch(ignorar);
+    transicao.finished.catch(ignorar);
+    transicao.updateCallbackDone.catch(ignorar);
+  } else {
+    swap();
+  }
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -46,6 +99,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [systemTheme, setSystemTheme] = React.useState<ResolvedTheme>(() =>
     getSystemTheme(),
   );
+  const [hourTheme, setHourTheme] = React.useState<ResolvedTheme>(() => getHourTheme());
 
   // Listener pra mudanças do prefers-color-scheme.
   React.useEffect(() => {
@@ -57,7 +111,32 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return () => mql.removeEventListener("change", onChange);
   }, []);
 
-  const resolvedTheme: ResolvedTheme = theme === "system" ? systemTheme : theme;
+  // Relógio do modo `auto`: um temporizador até a próxima virada (6h/18h), e
+  // uma reconferida quando a aba volta a ficar visível — notebook que dormiu às
+  // 17h e acordou às 19h não dispara o temporizador na hora certa, mas dispara
+  // `visibilitychange`.
+  React.useEffect(() => {
+    if (theme !== "auto") return;
+    let timer: number | undefined;
+    const check = () => {
+      setHourTheme(temaDaHora());
+      window.clearTimeout(timer);
+      timer = window.setTimeout(check, msAteAProximaVirada());
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") check();
+    };
+    check();
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", check);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", check);
+    };
+  }, [theme]);
+
+  const resolvedTheme = resolve(theme, systemTheme, hourTheme);
 
   // Aplica no DOM sempre que o tema efetivo muda.
   React.useEffect(() => {
@@ -75,8 +154,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const toggle = React.useCallback(() => {
     setThemeState((current) => {
-      const currentResolved =
-        current === "system" ? getSystemTheme() : current;
+      const currentResolved = resolve(current, getSystemTheme(), getHourTheme());
       const next: Theme = currentResolved === "dark" ? "light" : "dark";
       try {
         window.localStorage.setItem(STORAGE_KEY, next);

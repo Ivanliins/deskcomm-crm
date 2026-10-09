@@ -137,4 +137,14 @@ export {
   GoogleLogo,
   MapPin,
   ArrowsOutSimple,
+  // tema pela hora do dia (components/theme/theme-toggle.tsx)
+  SunHorizon,
+  // visão geral (app/app/visao-geral)
+  SquaresFour,
+  TrendUp,
+  TrendDown,
+  WhatsappLogo,
+  UserPlus,
+  Hourglass,
+  CurrencyCircleDollar,
 } from "@phosphor-icons/react/dist/ssr";

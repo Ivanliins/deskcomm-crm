@@ -14,6 +14,7 @@ import { REGUA_DO_PRODUTO } from "@/lib/branding/regua-do-produto";
 import { env } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { ThemeProvider } from "@/lib/theme";
+import { HORA_QUE_CLAREIA, HORA_QUE_ESCURECE } from "@/lib/tema-da-hora";
 import { Providers } from "./providers";
 import { PublicEnvScript } from "./public-env-script";
 import "./globals.css";
@@ -107,9 +108,13 @@ export const viewport: Viewport = {
   themeColor: coresDaBarraDoNavegador(REGUA_DO_PRODUTO),
 };
 
-// Inline FOUC-prevention. Conteúdo é string literal estática (zero input do usuário),
-// portanto seguro. Lê localStorage + prefers-color-scheme antes do primeiro paint.
-const THEME_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem('deskcomm-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;var r=(s==='dark'||s==='light')?s:((s==='system'||!s)&&d?'dark':'light');document.documentElement.setAttribute('data-theme',r);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`;
+// Inline FOUC-prevention. Conteúdo é string estática (zero input do usuário — as
+// duas horas são constantes do código), portanto seguro. Antes do primeiro paint:
+// escolha salva (claro/escuro) → `system` lê prefers-color-scheme → senão, o
+// padrão `auto`, que é a HORA DO DIA no relógio local, a mesma conta de
+// `lib/tema-da-hora.ts`. O localStorage indisponível (modo privado) cai no `auto`,
+// não no claro fixo: a falha de ler uma preferência não é motivo para ignorar a hora.
+const THEME_INIT_SCRIPT = `(function(){var s=null;try{s=localStorage.getItem('deskcomm-theme');}catch(e){}var r;if(s==='dark'||s==='light'){r=s;}else if(s==='system'&&window.matchMedia){r=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}else{var h=new Date().getHours();r=(h>=${HORA_QUE_CLAREIA}&&h<${HORA_QUE_ESCURECE})?'light':'dark';}document.documentElement.setAttribute('data-theme',r);})();`;
 
 /**
  * Motivos já registrados neste processo. `EstiloDaMarca` roda em TODA

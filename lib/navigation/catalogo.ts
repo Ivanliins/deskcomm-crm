@@ -105,6 +105,25 @@ export const GRUPO_NO_RODAPE: NavGroupId = "organizacao";
 export const NAV_CATALOG = [
   // ---- Atendimento — onde o operador passa o dia ----
   {
+    // A tela que o DONO abre primeiro: o resumo do período (atendimentos, quanto
+    // a IA respondeu, vendas, leads) e as duas filas que pedem ação — quem
+    // espera por uma pessoa e o que a IA está atendendo agora. Não substitui
+    // Desempenho (desfecho por atendente) nem Atividades (quem fez o quê): é a
+    // primeira dobra, e cada bloco dela aponta para a tela que aprofunda.
+    //
+    // Fica em "atendimento", e em primeiro, porque é a porta de entrada do dia —
+    // `homeDaInterface` manda gestor (manager+) para cá; quem atende continua
+    // caindo no Inbox. Sem `minRole`: os números saem do client de sessão, então
+    // a RLS recorta o que cada papel vê, como em Desempenho e Atividades.
+    href: "/app/visao-geral",
+    label: "Visão geral",
+    description:
+      "O resumo do período: atendimentos, respostas da IA, vendas, leads e quem está esperando por você.",
+    icon: "SquaresFour",
+    group: "atendimento",
+    sidebar: true,
+  },
+  {
     href: "/app/inbox",
     label: "Inbox",
     description: "As conversas de WhatsApp, com você e a IA atendendo lado a lado.",
@@ -303,7 +322,13 @@ export const NAV_CATALOG = [
     group: "ia",
     section: "Montar o agente",
     minRole: "manager",
-    sidebar: true,
+    // SEM `sidebar` desde a Visão geral: a linha dela no topo de "Atendimento"
+    // estourou a dobra de 900px por 13px (medido: 776px de menu contra 763px
+    // visíveis, linhas de 28px), e a régua da casa é tirar do menu a tela de
+    // configuração, não raspar pixel. Roteador se define uma vez e se revisita
+    // pouco — o mesmo critério de Credenciais e Provedores. Continua no hub "Ver
+    // tudo em IA" e no ⌘K, e o menu de IA fica como o dono aprovou no desenho
+    // da Visão geral: Agentes e Follow-ups.
   },
   {
     href: "/app/ai/credentials",

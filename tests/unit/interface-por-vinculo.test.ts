@@ -54,6 +54,16 @@ describe("interface por vínculo é apresentação", () => {
       expect.arrayContaining(["/app/team", "/app/settings/profile", "/app/settings/security"]),
     );
   });
+  it("home: quem gere abre na Visão geral; quem atende continua no Inbox", () => {
+    expect(homeDaInterface(null, false, "admin")).toBe("/app/visao-geral");
+    expect(homeDaInterface(null, false, "manager")).toBe("/app/visao-geral");
+    expect(homeDaInterface(null, true, null)).toBe("/app/visao-geral");
+    expect(homeDaInterface(null, false, "agent")).toBe("/app/inbox");
+    expect(homeDaInterface(null, false, "viewer")).toBe("/app/inbox");
+    // A interface simplificada não mostra a Visão geral: o gestor cai no Inbox,
+    // nunca numa tela que o vínculo dele escondeu.
+    expect(homeDaInterface(simplified, false, "admin")).toBe("/app/inbox");
+  });
   it("escrita recusa arbitrário/vazio; leitura remove obsoleto e degrada sem lançar", () => {
     expect(
       interfaceSettingsSchema.safeParse({ preset: "completa", destinos: ["https://evil.test"] })
