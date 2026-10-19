@@ -13,7 +13,10 @@ import { msAteAProximaVirada, temaDaHora } from "@/lib/tema-da-hora";
 export type Theme = "auto" | "light" | "dark" | "system";
 export type ResolvedTheme = "light" | "dark";
 
-const STORAGE_KEY = "deskcomm-theme";
+// Exportada para o teste reusar em vez de duplicar o literal — duplicar
+// acionaria `tests/unit/branding.test.ts` (a mesma marca hardcoded, fora da
+// lista congelada, num segundo arquivo).
+export const STORAGE_KEY = "deskcomm-theme";
 
 type ThemeContextValue = {
   /** User preference: auto (hora do dia), light, dark, or system. */
@@ -42,38 +45,21 @@ function getSystemTheme(): ResolvedTheme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function getHourTheme(): ResolvedTheme {
-  if (typeof window === "undefined") return "light";
-  return temaDaHora();
-}
-
-function resolve(theme: Theme, system: ResolvedTheme, hour: ResolvedTheme): ResolvedTheme {
-  if (theme === "auto") return hour;
-  if (theme === "system") return system;
-  return theme;
-}
-
 /**
  * Aplica no `<html>`. A troca é um cross-fade quando o navegador tem View
- * Transitions e a pessoa não pediu menos movimento — é o que faz a virada das
- * 18h acontecer sem um "piscar" no meio do trabalho.
+ * Transitions, a aba está visível e a pessoa não pediu menos movimento — é o
+ * que faz a virada das 18h acontecer sem um "piscar" no meio do trabalho.
  *
  * Só troca quando o valor MUDA: no primeiro efeito depois da hidratação o script
- * anti-flash do layout já deixou o atributo certo, e uma transição ali seria um
- * fade de uma tela para ela mesma.
- *
- * Com a aba OCULTA não há transição: o navegador a aborta (InvalidStateError) e
- * as promessas dela rejeitam sem ninguém ouvir — medido na vitrine, quatro erros
- * "Uncaught (in promise)" por troca. A virada das 18h numa aba esquecida em
- * segundo plano é justamente esse caso. As promessas ainda são "ouvidas" porque
- * o navegador também aborta por outros motivos (outra transição começando).
+ * anti-flash do layout já deixou o atributo certo. Com a aba OCULTA o navegador
+ * aborta a transição e as promessas dela rejeitariam sem ninguém ouvir.
  */
 function applyTheme(resolved: ResolvedTheme) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
   if (root.getAttribute("data-theme") === resolved) return;
   const swap = () => root.setAttribute("data-theme", resolved);
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? true;
   const doc = document as Document & {
     startViewTransition?: (update: () => void) => {
       ready: Promise<void>;
@@ -92,77 +78,150 @@ function applyTheme(resolved: ResolvedTheme) {
   }
 }
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Lê do storage no primeiro render do client (não causa hydration mismatch
-  // porque o inline script no layout já setou o data-theme antes do paint).
-  const [theme, setThemeState] = React.useState<Theme>(() => readStoredTheme());
-  const [systemTheme, setSystemTheme] = React.useState<ResolvedTheme>(() =>
-    getSystemTheme(),
-  );
-  const [hourTheme, setHourTheme] = React.useState<ResolvedTheme>(() => getHourTheme());
+/**
+ * ═══ POR QUE ISTO É UM EXTERNAL STORE, E NÃO `useState` + `useEffect` ═══
+ *
+ * A primeira renderização do CLIENTE é a de hidratação — a mesma que o React
+ * compara contra o HTML do servidor. `useState(() => readStoredTheme())` lia o
+ * `localStorage` nessa passada e divergia do servidor (ícone e `aria-label` do
+ * `ThemeToggle`). Com `useSyncExternalStore`, a hidratação vê
+ * `getServerSnapshot` dos dois lados e o valor real entra logo depois do commit,
+ * sem cascata de renders. Ver `lib/theme.test.tsx`.
+ */
+type Ouvinte = () => void;
+const ouvintesDeTema = new Set<Ouvinte>();
+let temaEmCache: Theme | null = null;
 
-  // Listener pra mudanças do prefers-color-scheme.
-  React.useEffect(() => {
+function getTemaSnapshot(): Theme {
+  if (temaEmCache === null) temaEmCache = readStoredTheme();
+  return temaEmCache;
+}
+function getTemaSnapshotDoServidor(): Theme {
+  return "auto";
+}
+function inscreverEmTema(ouvinte: Ouvinte): () => void {
+  ouvintesDeTema.add(ouvinte);
+  return () => ouvintesDeTema.delete(ouvinte);
+}
+function gravarTema(next: Theme) {
+  temaEmCache = next;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, next);
+  } catch {
+    // Persistência opcional — falha silenciosamente.
+  }
+  ouvintesDeTema.forEach((ouvinte) => ouvinte());
+}
+
+const ouvintesDeSistema = new Set<Ouvinte>();
+let sistemaEmCache: ResolvedTheme | null = null;
+
+function getSistemaSnapshot(): ResolvedTheme {
+  if (sistemaEmCache === null) sistemaEmCache = getSystemTheme();
+  return sistemaEmCache;
+}
+function getSistemaSnapshotDoServidor(): ResolvedTheme {
+  return "light";
+}
+function inscreverEmSistema(ouvinte: Ouvinte): () => void {
+  if (ouvintesDeSistema.size === 0 && typeof window !== "undefined") {
+    // Só liga UM listener nativo, mesmo com N componentes inscritos — o
+    // fan-out para os `ouvinte()` é responsabilidade deste módulo.
     const mql = window.matchMedia("(prefers-color-scheme: dark)");
     const onChange = (e: MediaQueryListEvent) => {
-      setSystemTheme(e.matches ? "dark" : "light");
+      sistemaEmCache = e.matches ? "dark" : "light";
+      ouvintesDeSistema.forEach((o) => o());
     };
     mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
+  }
+  ouvintesDeSistema.add(ouvinte);
+  return () => ouvintesDeSistema.delete(ouvinte);
+}
 
-  // Relógio do modo `auto`: um temporizador até a próxima virada (6h/18h), e
-  // uma reconferida quando a aba volta a ficar visível — notebook que dormiu às
-  // 17h e acordou às 19h não dispara o temporizador na hora certa, mas dispara
-  // `visibilitychange`.
-  React.useEffect(() => {
-    if (theme !== "auto") return;
-    let timer: number | undefined;
-    const check = () => {
-      setHourTheme(temaDaHora());
-      window.clearTimeout(timer);
-      timer = window.setTimeout(check, msAteAProximaVirada());
-    };
-    const onVisible = () => {
-      if (document.visibilityState === "visible") check();
-    };
-    check();
-    document.addEventListener("visibilitychange", onVisible);
-    window.addEventListener("focus", check);
-    return () => {
-      window.clearTimeout(timer);
-      document.removeEventListener("visibilitychange", onVisible);
-      window.removeEventListener("focus", check);
-    };
-  }, [theme]);
+/**
+ * O relógio do modo `auto`, no mesmo desenho de external store: um temporizador
+ * até a próxima virada (6h/18h) e uma reconferida quando a aba volta a ficar
+ * visível — notebook que dormiu às 17h e acordou às 19h não dispara o
+ * temporizador na hora certa, mas dispara `visibilitychange`.
+ */
+const ouvintesDaHora = new Set<Ouvinte>();
+let horaEmCache: ResolvedTheme | null = null;
+let desligarRelogio: (() => void) | null = null;
 
-  const resolvedTheme = resolve(theme, systemTheme, hourTheme);
+function getHoraSnapshot(): ResolvedTheme {
+  if (horaEmCache === null) horaEmCache = temaDaHora();
+  return horaEmCache;
+}
+function getHoraSnapshotDoServidor(): ResolvedTheme {
+  return "light";
+}
+function ligarRelogio(): () => void {
+  let timer: number | undefined;
+  const conferir = () => {
+    const agora = temaDaHora();
+    if (agora !== horaEmCache) {
+      horaEmCache = agora;
+      ouvintesDaHora.forEach((o) => o());
+    }
+    window.clearTimeout(timer);
+    timer = window.setTimeout(conferir, msAteAProximaVirada());
+  };
+  const aoVoltar = () => {
+    if (document.visibilityState === "visible") conferir();
+  };
+  timer = window.setTimeout(conferir, msAteAProximaVirada());
+  document.addEventListener("visibilitychange", aoVoltar);
+  window.addEventListener("focus", conferir);
+  return () => {
+    window.clearTimeout(timer);
+    document.removeEventListener("visibilitychange", aoVoltar);
+    window.removeEventListener("focus", conferir);
+  };
+}
+function inscreverNaHora(ouvinte: Ouvinte): () => void {
+  if (ouvintesDaHora.size === 0 && typeof window !== "undefined") {
+    desligarRelogio = ligarRelogio();
+  }
+  ouvintesDaHora.add(ouvinte);
+  return () => {
+    ouvintesDaHora.delete(ouvinte);
+    if (ouvintesDaHora.size === 0) {
+      desligarRelogio?.();
+      desligarRelogio = null;
+    }
+  };
+}
 
-  // Aplica no DOM sempre que o tema efetivo muda.
+function resolver(theme: Theme, sistema: ResolvedTheme, hora: ResolvedTheme): ResolvedTheme {
+  if (theme === "auto") return hora;
+  if (theme === "system") return sistema;
+  return theme;
+}
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const theme = React.useSyncExternalStore(inscreverEmTema, getTemaSnapshot, getTemaSnapshotDoServidor);
+  const systemTheme = React.useSyncExternalStore(
+    inscreverEmSistema,
+    getSistemaSnapshot,
+    getSistemaSnapshotDoServidor,
+  );
+  const hourTheme = React.useSyncExternalStore(inscreverNaHora, getHoraSnapshot, getHoraSnapshotDoServidor);
+
+  const resolvedTheme = resolver(theme, systemTheme, hourTheme);
+
+  // Efeito colateral (mutar `data-theme` no `<html>`) a partir de um valor
+  // computado — por isso continua em `useEffect`, sem `setState`.
   React.useEffect(() => {
     applyTheme(resolvedTheme);
   }, [resolvedTheme]);
 
   const setTheme = React.useCallback((next: Theme) => {
-    setThemeState(next);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      // Persistência opcional — falha silenciosamente.
-    }
+    gravarTema(next);
   }, []);
 
   const toggle = React.useCallback(() => {
-    setThemeState((current) => {
-      const currentResolved = resolve(current, getSystemTheme(), getHourTheme());
-      const next: Theme = currentResolved === "dark" ? "light" : "dark";
-      try {
-        window.localStorage.setItem(STORAGE_KEY, next);
-      } catch {
-        // ignore
-      }
-      return next;
-    });
+    const resolvidoAtual = resolver(getTemaSnapshot(), getSistemaSnapshot(), getHoraSnapshot());
+    gravarTema(resolvidoAtual === "dark" ? "light" : "dark");
   }, []);
 
   const value = React.useMemo<ThemeContextValue>(
