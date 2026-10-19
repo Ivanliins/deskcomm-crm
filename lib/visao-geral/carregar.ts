@@ -34,7 +34,7 @@ import {
   ROTULO_DO_MOTIVO,
   type ComandoDoBanco,
 } from "@/lib/inbox/comando-da-conversa";
-import { phoneForDisplay } from "@/lib/channels/phone-variants";
+import { rotuloDoCanalDaConversa } from "@/lib/channels/estado";
 import { logger } from "@/lib/logger";
 
 import {
@@ -555,7 +555,7 @@ async function lerRecentes(
       id: c.id,
       contato: resumirContato(um(c.contacts), t),
       quando: c.last_message_at,
-      canal: canal?.display_name?.trim() || (canal?.phone_number ? phoneForDisplay(canal.phone_number) : null),
+      canal: rotuloDoCanalDaConversa(canal, t),
       comando,
       atendente: comando === "humano" ? c.assigned_to_user_name : null,
       etapa: negocio?.etapa ?? null,

@@ -1,7 +1,9 @@
 import { ImageResponse } from "next/og";
 
-import { SELO_SETA_PATHS, SELO_SETA_VIEWBOX } from "@/lib/branding/marca-icone-svg";
-import { marcaDaSaida } from "@/lib/branding/saida";
+import { marcaEhADoProduto } from "@/lib/branding";
+import { CORES_DA_MARCA, SIMBOLO } from "@/lib/branding/desenho";
+import { letraDoIcone } from "@/lib/branding/icone";
+import { marcaDaSaida, NEUTROS_DE_SAIDA } from "@/lib/branding/saida";
 
 /**
  * O ícone da aba, DESENHADO em runtime com a marca da instalação.
@@ -23,18 +25,25 @@ import { marcaDaSaida } from "@/lib/branding/saida";
  * documenta para `NEXT_PUBLIC_*`: verde em dev, verde no CI, verde na Vercel, e
  * errado exatamente na VPS de quem a feature existe para servir.
  *
- * ─── Cor + selo desenhado, NUNCA o `logo_url` ────────────────────────────────
+ * ─── Cor + inicial, NUNCA o `logo_url` ──────────────────────────────────────
  *
  * `platform_branding.logo_url` é `text` livre, sem CHECK de host
  * (`supabase/baseline.sql:11832-11848`). Buscá-la aqui seria uma requisição de
  * saída disparada pelo `<head>` de TODA página, com a URL vinda de um campo que
- * o operador digita — SSRF com gatilho em cada page load. Desenhar o ícone de
- * cor + seta (`lib/branding/marca-icone-svg.ts`) não toca a rede: o accent vem
- * do mesmo resolvedor que pinta os e-mails (`marcaDaSaida`), e o path SVG é
- * dado estático — nenhuma dependência nova, nenhum download. Ao contrário da
- * letra que este arquivo desenhava antes, a seta NÃO deriva do nome da
- * instalação: é a mesma em qualquer marca, então não há letra de ninguém para
- * vazar — quem quiser um selo próprio sobrepõe via `logo_path`/`logo_url`.
+ * o operador digita — SSRF com gatilho em cada page load. Derivar o ícone de
+ * cor + inicial não toca a rede: o accent vem do mesmo resolvedor que pinta os
+ * e-mails (`marcaDaSaida`) e a fonte (`Geist-Regular.ttf`) vem embutida no
+ * `@vercel/og` que o Next já traz — nenhuma dependência nova, nenhum download.
+ *
+ * ─── O símbolo do produto, quando a marca é a do produto ────────────────────
+ *
+ * Sem nome nem logo configurados (`marcaEhADoProduto`), o ladrilho é o símbolo
+ * de `lib/branding/desenho.ts` sobre o creme da régua — o mesmo desenho que a
+ * barra lateral e a fachada mostram, para a aba e a tela contarem a mesma
+ * marca. O satori aceita `<svg>` inline (medido: 1.135 bytes de PNG válido com
+ * o símbolo, em 2026-09-08), então continua sem rede e sem arquivo em `public/`.
+ * Quem configurou um nome próprio segue com cor + inicial: o símbolo soletra
+ * "D", e um "D" na aba de quem se chama "Acme" seria a nossa marca vazando.
  *
  * ─── `force-dynamic` não é zelo ─────────────────────────────────────────────
  *
@@ -69,6 +78,36 @@ export const contentType = "image/png";
 export default async function Icon() {
   const marca = await marcaDaSaida(null);
 
+  if (marcaEhADoProduto({ name: marca.nome, logoUrl: marca.logoUrl })) {
+    // 78% da aresta: o D ocupa ~75% do próprio viewBox, então sobra o mesmo
+    // respiro que a letra tem no ramo de baixo.
+    const lado = Math.round(size.width * 0.78);
+    return new ImageResponse(
+      (
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: NEUTROS_DE_SAIDA.fundo,
+          }}
+        >
+          <svg viewBox={SIMBOLO.viewBox} width={lado} height={lado}>
+            <g fill={CORES_DA_MARCA.claro.simbolo} transform={SIMBOLO.transform}>
+              <path d={SIMBOLO.d} />
+              <rect {...SIMBOLO.modulo} />
+            </g>
+          </svg>
+        </div>
+      ),
+      { ...size, headers: CACHE },
+    );
+  }
+
+  const letra = letraDoIcone(marca.nome);
+
   return new ImageResponse(
     (
       <div
@@ -79,27 +118,24 @@ export default async function Icon() {
           alignItems: "center",
           justifyContent: "center",
           background: marca.accent,
+          color: marca.accentFg,
+          // 62% da altura: a caixa maiúscula do Geist ocupa ~72% do em, então
+          // a letra fica com respiro sem virar um selo minúsculo no meio.
+          fontSize: Math.round(size.height * 0.62),
           // O ladrilho é quadrado e cheio: o navegador já arredonda o favicon
           // no chrome dele, e arredondar aqui também produz canto duplo.
           borderRadius: 0,
         }}
       >
-        <svg width={size.width * 0.56} height={size.height * 0.56} viewBox={SELO_SETA_VIEWBOX} fill="none">
-          {SELO_SETA_PATHS.map((d) => (
-            <path key={d} d={d} stroke={marca.accentFg} strokeWidth={4.5} strokeLinecap="round" strokeLinejoin="round" />
-          ))}
-        </svg>
+        {letra ?? ""}
       </div>
     ),
-    {
-      ...size,
-      headers: {
-        // 60s é deliberado, e o par com o TTL da marca: o operador que troca a
-        // cor em `/admin/marca` vê a aba acompanhar dentro de um minuto. Um
-        // `immutable` de um ano tornaria a tela de marca uma promessa que o
-        // ícone não cumpre; `no-store` faria o satori rodar a cada navegação.
-        "cache-control": "public, max-age=60, stale-while-revalidate=600",
-      },
-    },
+    { ...size, headers: CACHE },
   );
 }
+
+// 60s é deliberado, e o par com o TTL da marca: o operador que troca a cor em
+// `/admin/marca` vê a aba acompanhar dentro de um minuto. Um `immutable` de um
+// ano tornaria a tela de marca uma promessa que o ícone não cumpre; `no-store`
+// faria o satori rodar a cada navegação.
+const CACHE = { "cache-control": "public, max-age=60, stale-while-revalidate=600" };

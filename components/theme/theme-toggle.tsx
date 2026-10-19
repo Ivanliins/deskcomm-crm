@@ -1,11 +1,10 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-
 import { useTheme, type Theme } from "@/lib/theme";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Sun, Moon, MonitorPlay, SunHorizon } from "@/lib/ui/icons";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useT } from "@/hooks/i18n/useT";
 
 /**
@@ -22,6 +21,7 @@ const PROXIMO: Record<Theme, Theme> = {
 
 const ICONE = { auto: SunHorizon, light: Sun, dark: Moon, system: MonitorPlay } as const;
 
+/** O que o modo quer dizer, por extenso — vai na dica do botão. */
 const ROTULO: Record<Theme, string> = {
   auto: "Tema pela hora do dia: claro de dia, escuro à noite",
   light: "Tema claro",
@@ -29,18 +29,21 @@ const ROTULO: Record<Theme, string> = {
   system: "Tema do sistema",
 };
 
-const nada = () => () => {};
-
-export function ThemeToggle() {
+/**
+ * ⚠️ O ATALHO `mod+shift+l` MORA AQUI DENTRO, e por isso ele só existe onde
+ * este componente está montado. Até 20/09/2026 o `ThemeToggle` só era montado
+ * pelo `components/shell/UserMenu.tsx` (a casca do tenant), o que deixava TODA a
+ * superfície de Admin Plataforma sem botão e sem atalho: quem entrava direto
+ * lá — e o `install.sh` cria o dono como platform admin, então é onde muita
+ * gente cai primeiro — ficava preso ao tema que estivesse valendo, sem
+ * descobrir que a troca existia numa outra casca.
+ *
+ * `className` existe para a tarja do Modo Plataforma, que tem 40px de altura e
+ * não comporta os 44px de alvo de toque do `size="icon"`.
+ */
+export function ThemeToggle({ className }: { className?: string }) {
   const t = useT();
-  const { theme: escolhido, setTheme } = useTheme();
-  // A escolha mora no `localStorage`, que o servidor não lê: ele sempre desenha
-  // o padrão (`auto`). Desenhar a escolha já na hidratação faria o ícone e o
-  // rótulo do servidor ficarem na tela — o React não remenda atributo divergente
-  // — até o próximo clique. Então o primeiro desenho do navegador repete o do
-  // servidor, e a escolha entra logo depois de hidratar.
-  const hidratado = useSyncExternalStore(nada, () => true, () => false);
-  const theme: Theme = hidratado ? escolhido : "auto";
+  const { theme, setTheme } = useTheme();
 
   const cycle = () => {
     setTheme(PROXIMO[theme]);
@@ -49,10 +52,21 @@ export function ThemeToggle() {
   useHotkeys("mod+shift+l", cycle, { preventDefault: true }, [theme]);
 
   const Icon = ICONE[theme];
-  const rotulo = `${t(ROTULO[theme])}. ${t("Cmd+Shift+L para alternar.")}`;
 
   return (
-    <Button variant="ghost" size="icon" onClick={cycle} aria-label={rotulo} title={rotulo}>
+    <Button
+      variant="ghost"
+      size="icon"
+      className={cn(className)}
+      onClick={cycle}
+      aria-label={t(`Tema: ${theme}. Cmd+Shift+L para alternar.`)}
+      title={t(ROTULO[theme])}
+      // O servidor não sabe a preferência salva no navegador do usuário --
+      // renderiza um valor default e o cliente corrige pro valor real assim
+      // que hidrata. É o mismatch ESPERADO de todo seletor de tema; React
+      // "corrige" sozinho no primeiro render, só reclamava no console.
+      suppressHydrationWarning
+    >
       <Icon size={16} aria-hidden />
     </Button>
   );
