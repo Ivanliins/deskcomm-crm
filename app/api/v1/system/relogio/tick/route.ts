@@ -15,7 +15,7 @@ import { env } from "@/lib/env";
 import { executarTickDoRelogio } from "@/lib/relogio/executar";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300; // UpFlow: unificado em 300 — no plano Hobby da Vercel cada valor distinto vira uma função a mais, e o limite é 12 por deploy.
 
 /**
  * Comparação em TEMPO CONSTANTE, e não `includes()`.

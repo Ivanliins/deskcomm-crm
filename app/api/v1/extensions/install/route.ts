@@ -5,7 +5,7 @@ import { installExtension } from "@/lib/extensions/service";
 import { requireSupportWrite } from "@/lib/impersonate/support";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
+export const maxDuration = 300; // UpFlow: unificado em 300 — no plano Hobby da Vercel cada valor distinto vira uma função a mais, e o limite é 12 por deploy.
 
 export async function POST(request: Request): Promise<Response> {
   try {

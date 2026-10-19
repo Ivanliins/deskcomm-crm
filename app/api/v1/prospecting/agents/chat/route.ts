@@ -11,7 +11,7 @@ import { AgentSetupError } from "@/lib/prospecting/agent-setup";
 import { beginAgentChat, finishAgentChat } from "@/lib/prospecting/agent-session";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 120;
+export const maxDuration = 300; // UpFlow: unificado em 300 — no plano Hobby da Vercel cada valor distinto vira uma função a mais, e o limite é 12 por deploy.
 
 export async function POST(req: Request) {
   const requestId = randomUUID();

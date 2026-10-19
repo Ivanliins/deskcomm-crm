@@ -19,7 +19,7 @@ import { validarModelo } from "@/lib/propostas/modelos/validar-modelo";
 import { sePropostasDesligadas } from "@/lib/propostas/porta";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 120;
+export const maxDuration = 300; // UpFlow: unificado em 300 — no plano Hobby da Vercel cada valor distinto vira uma função a mais, e o limite é 12 por deploy.
 const TAMANHO_MAXIMO = 5 * 1024 * 1024;
 
 export async function POST(req: NextRequest): Promise<Response> {
